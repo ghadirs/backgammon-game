@@ -27,6 +27,7 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
   const POINT_W = QUADRANT_WIDTH / 6;
   const POINT_H = HEIGHT * 0.4;
 
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -368,61 +369,84 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
     const drawSingleChecker = (ctx: CanvasRenderingContext2D, x: number, y: number, r: number, isBlack: boolean) => {
       ctx.save();
 
-      // 1. Dilation/Outer Shadow (Simulating the SVG Filter feMorphology + feGaussianBlur)
-      // The SVG uses a dilation radius of 3 and blur of 2.5
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
-      ctx.shadowBlur = 10;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
+      if (isBlack) {
+        // --- DARK PIECE DESIGN (Direct SVG Translation) ---
 
-      // 2. Main Circle Body
-      // Using the SVG fill color #9B5A3D for brown and #1A1A1A for black
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = isBlack ? '#1A1A1A' : '#9B5A3D';
-      ctx.fill();
+        // 1. Drop Shadow (feMorphology + feGaussianBlur)
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2;
 
-      // Reset shadow for inner details
-      ctx.shadowBlur = 0;
+        // 2. Main Circle Body (fill="#1A0802")
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#1A0802';
+        ctx.fill();
 
-      // 3. Stroke/Border (The SVG cx="25.5" cy="25.5" r="17" stroke="#5B321E")
-      ctx.beginPath();
-      ctx.arc(x, y, r - 0.5, 0, Math.PI * 2);
-      ctx.strokeStyle = isBlack ? '#000000' : '#5B321E';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+        // Reset shadow for internal layers
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
 
-      // 4. Inner Shadow - Bottom Right (Simulating SVG feOffset dx="2" dy="2")
-      ctx.save();
-      ctx.clip(); // Ensure inner shadow stays inside the circle
-      ctx.beginPath();
-      ctx.arc(x + 2, y + 2, r, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-      ctx.lineWidth = 4;
-      ctx.shadowBlur = 4;
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-      ctx.stroke();
-      ctx.restore();
+        // 3. The Rim/Stroke (stroke="#4E3529")
+        ctx.beginPath();
+        ctx.arc(x, y, r - 0.5, 0, Math.PI * 2);
+        ctx.strokeStyle = '#4E3529';
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
-      // 5. Inner Shadow - Top Left (Simulating SVG feOffset dx="-2" dy="-2" color #F2AC66)
-      ctx.save();
-      ctx.clip();
-      ctx.beginPath();
-      ctx.arc(x - 2, y - 2, r, 0, Math.PI * 2);
-      // Using the light amber color from the SVG filter for the highlight shadow
-      ctx.strokeStyle = isBlack ? 'rgba(255, 255, 255, 0.1)' : 'rgba(242, 172, 102, 0.4)';
-      ctx.lineWidth = 4;
-      ctx.shadowBlur = 4;
-      ctx.shadowColor = isBlack ? 'rgba(255, 255, 255, 0.2)' : 'rgba(242, 172, 102, 0.5)';
-      ctx.stroke();
-      ctx.restore();
+        // --- INNER SHADOWS ---
+        ctx.save();
+        ctx.clip(); // Ensure shadows don't spill outside the checker
 
-      // 6. Center Detail (The "Golden Ring" aesthetic from your previous reference)
-      ctx.beginPath();
-      ctx.arc(x, y, r * 0.65, 0, Math.PI * 2);
-      ctx.strokeStyle = isBlack ? 'rgba(255, 255, 255, 0.05)' : 'rgba(91, 50, 30, 0.3)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+        // 4. Dark Inner Shadow (Bottom-Right, feOffset dx="2" dy="2")
+        ctx.beginPath();
+        ctx.arc(x, y, r + 2, 0, Math.PI * 2); // Slightly larger circle to create offset
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 5. Light Amber Inner Shadow (Top-Left, feOffset dx="-2" dy="-2")
+        // Values from your SVG: #F2AC66 at 25% opacity
+        ctx.beginPath();
+        ctx.arc(x, y, r + 2, 0, Math.PI * 2);
+        ctx.shadowColor = 'rgba(242, 172, 102, 0.25)';
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = -2;
+        ctx.shadowOffsetY = -2;
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.restore(); // Exit clip
+
+      } else {
+        // --- LIGHT PIECE DESIGN (Existing Brown Wood) ---
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#9B5A3D';
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.arc(x, y, r - 0.5, 0, Math.PI * 2);
+        ctx.strokeStyle = '#5B321E';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Simple bevel for light pieces
+        ctx.beginPath();
+        ctx.arc(x, y, r * 0.75, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.stroke();
+      }
 
       ctx.restore();
     };

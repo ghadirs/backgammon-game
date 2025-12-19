@@ -18,9 +18,9 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
   const HEIGHT = 700;
 
   // Section Dimensions
-  const SIDEBAR_WIDTH = 90; // Left and Right panels
+  const SIDEBAR_WIDTH = 80; // Left and Right panels
   const BAR_WIDTH = 50;     // Center hinge/bar
-  const MARGIN_V = 30;      // Vertical margin
+  const MARGIN_V = 10;      // Vertical margin
 
   // Play Area Calculations
   const PLAY_AREA_WIDTH = WIDTH - (SIDEBAR_WIDTH * 2) - BAR_WIDTH;
@@ -36,6 +36,81 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+
+  }, []);
+
+
+
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // --- Drawing Helper Functions ---
+
+    /**
+     * Draws the side trays (bear-off areas) with wood textures and cream inlays.
+     * @param {CanvasRenderingContext2D} ctx - The canvas context
+     * @param {number} x - Horizontal start position
+     * @param {number} y - Vertical start position
+     * @param {number} w - Width of the tray
+     * @param {number} h - Total height of the tray
+     */
+    const drawSideTray = (ctx, x, y, w, h) => {
+      ctx.save();
+
+      // 1. Draw the recessed tray background (Dark Wood)
+      // We use a linear gradient to simulate the "depth" of the tray
+      const trayGrad = ctx.createLinearGradient(x, y, x + w, y);
+      trayGrad.addColorStop(0, '#3E2315'); // Left shadow
+      trayGrad.addColorStop(0.5, '#5D3A25'); // Center base wood
+      trayGrad.addColorStop(1, '#3E2315'); // Right shadow
+
+      ctx.fillStyle = trayGrad;
+      ctx.beginPath();
+      // Drawing the tray slightly rounded to match the board edges
+      ctx.roundRect(x, y, w, h, 4);
+      ctx.fill();
+
+      // 2. Add a subtle inner shadow for depth
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 3. Draw the Cream-Colored Inlay Squares
+      // In your design, these are positioned in the center-right area
+      const squareSize = w * 0.85; // Slightly smaller than tray width
+      const centerX = x + (w - squareSize) / 2;
+      const centerY = y + h / 2;
+      const gap = 10; // Space between the two squares
+
+      const drawInlaySquare = (posY) => {
+        ctx.save();
+        // Cream base color
+        ctx.fillStyle = '#E7C697';
+
+        // Add wood grain effect to the inlay to match image_49048a.jpg
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(0,0,0,0.2)';
+
+        ctx.fillRect(centerX, posY, squareSize, squareSize);
+
+        // Subtle highlight on the inlay
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(centerX, posY, squareSize, squareSize);
+        ctx.restore();
+      };
+
+      // Draw the top and bottom cream inlays
+      drawInlaySquare(centerY - squareSize - gap / 2);
+      drawInlaySquare(centerY + gap / 2);
+
+      ctx.restore();
+    };
 
 
 
@@ -65,6 +140,8 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
 
       ctx.restore();
     };
+
+
 
     const drawMainBoard = () => {
       // Main background (Dark Wood Frame)
@@ -98,42 +175,7 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
           '#d4b483',
           0.1
       );
-
-      // Center Bar (Hinge)
-      drawWoodTexture(
-          SIDEBAR_WIDTH + QUADRANT_WIDTH,
-          0,
-          BAR_WIDTH,
-          HEIGHT,
-          '#6f432a',
-          '#3e2315',
-          0.2
-      );
-
-      // Inner shadow for depth
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = 'rgba(0,0,0,0.6)';
-      ctx.shadowInset = true;
-      ctx.strokeStyle = 'rgba(40, 20, 10, 0.8)';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(SIDEBAR_WIDTH, MARGIN_V, QUADRANT_WIDTH, HEIGHT - MARGIN_V * 2);
-      ctx.strokeRect(SIDEBAR_WIDTH + QUADRANT_WIDTH + BAR_WIDTH, MARGIN_V, QUADRANT_WIDTH, HEIGHT - MARGIN_V * 2);
-      ctx.shadowBlur = 0;
-    };
-    drawMainBoard()
-  }, []);
-
-
-
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // --- Drawing Helper Functions ---
-
+    }
 
 
     const drawPoints = () => {
@@ -335,6 +377,30 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
     };
 
     // --- Execute Draws ---
+      drawWoodTexture(
+          SIDEBAR_WIDTH + QUADRANT_WIDTH,
+          0,
+          BAR_WIDTH,
+          HEIGHT,
+          '#6f432a',
+          '#3e2315',
+          0.2
+      );
+
+      // Inner shadow for depth
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowInset = true;
+      ctx.strokeStyle = 'rgba(40, 20, 10, 0.8)';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(SIDEBAR_WIDTH, MARGIN_V, QUADRANT_WIDTH, HEIGHT - MARGIN_V * 2);
+      ctx.strokeRect(SIDEBAR_WIDTH + QUADRANT_WIDTH + BAR_WIDTH, MARGIN_V, QUADRANT_WIDTH, HEIGHT - MARGIN_V * 2);
+      ctx.shadowBlur = 0;
+
+    drawMainBoard()
+    drawSideTray(ctx, 10, MARGIN_V, SIDEBAR_WIDTH - 20, HEIGHT - (MARGIN_V * 2));
+    // This matches image_57f202.png positioning
+    drawSideTray(ctx, WIDTH - SIDEBAR_WIDTH + 10, MARGIN_V, SIDEBAR_WIDTH - 20, HEIGHT - (MARGIN_V * 2));
     drawPoints();
     drawCheckers();
     drawUI();

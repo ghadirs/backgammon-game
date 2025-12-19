@@ -1,10 +1,10 @@
 "use client"; // CRITICAL: This allows the use of useState/useEffect in Next.js
 
-import React, { useState, useEffect } from 'react';
+import React, {useState} from 'react';
 // Update these paths to use the '@' alias pointing to your src folder
 import BackgammonBoard from '@/components/BackgammonBoard';
 import DiceCanvas from "@/components/DiceCanvas";
-import { Player, BoardState } from '@/types'; // Move your types.ts to src/types.ts
+import {BoardState, Player} from '@/types'; // Move your types.ts to src/types.ts
 
 // Keep your INITIAL_BOARD and other constants outside the component
 const INITIAL_BOARD: BoardState = {
@@ -47,7 +47,7 @@ export default function GameplayPage() {
     };
 
     const handlePointClick = (index: number) => {
-        const newBoard = { ...board, points: [...board.points] };
+        const newBoard = {...board, points: [...board.points]};
         const count = newBoard.points[index];
 
         if (count !== 0) {
@@ -65,7 +65,8 @@ export default function GameplayPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-center p-8 font-serif">
+        <div
+            className="min-h-screen w-full flex flex-col items-center justify-center p-4 md:p-8 bg-[#1a1a1a] p-8 font-serif">
             {/* ... Your existing JSX ... */}
             <div className="mb-8 text-center">
                 <h1 className="text-5xl font-extrabold text-[#d4af37] tracking-widest uppercase mb-2 drop-shadow-md">
@@ -83,7 +84,7 @@ export default function GameplayPage() {
                 />
 
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                    <DiceCanvas dice={dice} isRolling={isRolling} />
+                    <DiceCanvas dice={dice} isRolling={isRolling}/>
                 </div>
             </div>
 

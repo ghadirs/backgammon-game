@@ -12,6 +12,7 @@ interface Props {
 const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p2Score = 51 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+
   // General Dimensions
   const WIDTH = 1100; // Slightly wider to accommodate side panels
   const HEIGHT = 700;
@@ -28,13 +29,15 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
   const POINT_H = HEIGHT * 0.4;
 
 
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // --- Drawing Helper Functions ---
+
 
     // 1. Procedural Wood Texture Generator (No external images needed)
     const drawWoodTexture = (x: number, y: number, w: number, h: number, baseColor: string, grainColor: string, intensity: number) => {
@@ -117,82 +120,20 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
       ctx.strokeRect(SIDEBAR_WIDTH + QUADRANT_WIDTH + BAR_WIDTH, MARGIN_V, QUADRANT_WIDTH, HEIGHT - MARGIN_V * 2);
       ctx.shadowBlur = 0;
     };
+    drawMainBoard()
+  }, []);
 
-    // const drawPoints = () => {
-    //   for (let i = 0; i < 24; i++) {
-    //     const isTop = i >= 12;
-    //     let x = 0;
-    //     let y = isTop ? MARGIN_V : HEIGHT - MARGIN_V;
-    //
-    //     // Calculate X position based on index and layout
-    //     // 0-5: Bottom Right | 6-11: Bottom Left | 12-17: Top Left | 18-23: Top Right
-    //     if (i < 6) {
-    //       x = WIDTH - SIDEBAR_WIDTH - (i + 1) * POINT_W;
-    //     } else if (i < 12) {
-    //       x = SIDEBAR_WIDTH + (11 - i) * POINT_W;
-    //     } else if (i < 18) {
-    //       x = SIDEBAR_WIDTH + (i - 12) * POINT_W;
-    //     } else {
-    //       x = WIDTH - SIDEBAR_WIDTH - (23 - i + 1) * POINT_W;
-    //     }
-    //
-    //     const tipY = isTop ? y + POINT_H : y - POINT_H;
-    //     const isDark = i % 2 === 0;
-    //
-    //     if (isDark) {
-    //       // --- DARK TRIANGLES (Red with Gold Border) ---
-    //
-    //       // 1. Base Dark Red Triangle
-    //       ctx.beginPath();
-    //       ctx.moveTo(x, y);
-    //       ctx.lineTo(x + POINT_W / 2, tipY);
-    //       ctx.lineTo(x + POINT_W, y);
-    //       ctx.closePath();
-    //       ctx.fillStyle = '#7a1f1f'; // Deep Maroon/Burgundy
-    //       ctx.fill();
-    //
-    //       // 2. Inner Gold/Yellow Border
-    //       // We calculate a slightly smaller triangle inside
-    //       const inset = 6; // How far the line is from the edge
-    //       const innerTipY = isTop ? tipY - 15 : tipY + 15; // Tip is slightly blunt/lower
-    //
-    //       ctx.beginPath();
-    //       // Start point (Left Base)
-    //       ctx.moveTo(x + inset, y);
-    //       // Tip Point
-    //       ctx.lineTo(x + POINT_W / 2, innerTipY);
-    //       // End Point (Right Base)
-    //       ctx.lineTo(x + POINT_W - inset, y);
-    //       // Close loop back to start
-    //       ctx.lineTo(x + inset, y);
-    //
-    //       ctx.strokeStyle = '#eeb558'; // Gold/Amber color
-    //       ctx.lineWidth = 2;
-    //       ctx.lineJoin = 'round'; // Smooth corners
-    //       ctx.stroke();
-    //
-    //     } else {
-    //       // --- LIGHT TRIANGLES (Standard Light Wood) ---
-    //       ctx.beginPath();
-    //       ctx.moveTo(x, y);
-    //       ctx.lineTo(x + POINT_W / 2, tipY);
-    //       ctx.lineTo(x + POINT_W, y);
-    //       ctx.closePath();
-    //       ctx.fillStyle = '#deb887'; // Light wood color
-    //       ctx.fill();
-    //     }
-    //
-    //     // Optional: Very subtle outline for all points for crispness
-    //     ctx.beginPath();
-    //     ctx.moveTo(x, y);
-    //     ctx.lineTo(x + POINT_W / 2, tipY);
-    //     ctx.lineTo(x + POINT_W, y);
-    //     ctx.closePath();
-    //     ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-    //     ctx.lineWidth = 1;
-    //     ctx.stroke();
-    //   }
-    // };
+
+
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // --- Drawing Helper Functions ---
+
 
 
     const drawPoints = () => {
@@ -394,7 +335,6 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
     };
 
     // --- Execute Draws ---
-    drawMainBoard();
     drawPoints();
     drawCheckers();
     drawUI();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import BackgammonBoard from './components/BackgammonBoard';
+import BackgammonBoard from '@/src/components/BackgammonBoard';
 import { Player, BoardState } from './types';
-import DiceCanvas from "@/components/DiceCanvas.tsx";
+import DiceCanvas from "@/src/components/DiceCanvas.tsx";
 
 const INITIAL_BOARD: BoardState = {
   points: [

@@ -19,8 +19,9 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
 
   // Section Dimensions
   const SIDEBAR_WIDTH = 80; // Left and Right panels
-  const BAR_WIDTH = 50;     // Center hinge/bar
   const MARGIN_V = 10;      // Vertical margin
+  const BAR_WIDTH = 60;     // Center hinge/bar
+  const BAR_H = HEIGHT - (MARGIN_V * 2);
 
   // Play Area Calculations
   const PLAY_AREA_WIDTH = WIDTH - (SIDEBAR_WIDTH * 2) - BAR_WIDTH;
@@ -175,7 +176,50 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
           '#d4b483',
           0.1
       );
+
+      // Calculate the center point of the board
+      const centerX = SIDEBAR_WIDTH + QUADRANT_WIDTH + (BAR_WIDTH / 2);
+      const centerY = HEIGHT / 2;
+      // Call the new refactored bar
+      drawCenterBar(ctx, centerX, centerY);
     }
+
+    const drawCenterBar = (ctx, x, y) => {
+
+      ctx.save();
+
+      // 1. Move to the center of the board
+      ctx.translate(x - BAR_WIDTH / 2, y - BAR_H / 2);
+
+      // 2. Drop Shadow (effect1_dropShadow_1_339)
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+
+      // 3. Main Rect (fill="#623D2C")
+      ctx.fillStyle = '#623D2C';
+      ctx.globalCompositeOperation = 'hard-light'; // mix-blend-mode: hard-light
+      ctx.fillRect(0, 0, BAR_WIDTH, BAR_H);
+
+      // 4. Inner Shadow (effect2_innerShadow_1_339)
+      // stdDeviation="9.5" creates a very soft, deep internal glow
+      ctx.save();
+      ctx.clip(); // Ensure shadow stays inside
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+      ctx.shadowBlur = 19; // stdDeviation * 2
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
+      // We draw a stroke around the edge to cast the shadow inward
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0, 0, BAR_WIDTH, BAR_H);
+      ctx.restore();
+
+      ctx.restore();
+    };
 
 
     const drawPoints = () => {

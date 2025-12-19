@@ -2,7 +2,7 @@ import type {Metadata} from "next";
 import "./globals.scss"; // Ensure this file exists for global styles
 
 export const metadata: Metadata = {
-    title: "Royal Backgammon",
+    title: "Backgammon Game",
     description: "A Masterpiece of Strategy & Luck",
 };
 

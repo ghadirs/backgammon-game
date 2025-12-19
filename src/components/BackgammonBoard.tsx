@@ -3,13 +3,12 @@ import {BoardState} from '@/types';
 
 interface Props {
     board: BoardState;
-    onPointClick: (index: number) => void;
     // Optional scores for the left panel
     p1Score?: number;
     p2Score?: number;
 }
 
-const BackgammonBoard: React.FC<Props> = ({board, onPointClick, p1Score = 88, p2Score = 51}) => {
+const BackgammonBoard: React.FC<Props> = ({board, p1Score = 88, p2Score = 51}) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [hasMounted, setHasMounted] = useState(false);
 
@@ -458,9 +457,7 @@ const BackgammonBoard: React.FC<Props> = ({board, onPointClick, p1Score = 88, p2
             }
         }
 
-        if (pointIdx >= 0 && pointIdx <= 23) {
-            onPointClick(pointIdx);
-        }
+
     };
 
     return (

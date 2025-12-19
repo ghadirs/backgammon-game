@@ -1,11 +1,11 @@
-import React, { useRef, useEffect } from 'react';
+import React, {useEffect, useRef} from 'react';
 
 interface DiceProps {
     dice: number[];
     isRolling: boolean;
 }
 
-const DiceCanvas: React.FC<DiceProps> = ({ dice, isRolling }) => {
+const DiceCanvas: React.FC<DiceProps> = ({dice, isRolling}) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const requestRef = useRef<number>();
 
@@ -90,6 +90,11 @@ const DiceCanvas: React.FC<DiceProps> = ({ dice, isRolling }) => {
 
     return (
         <canvas
+            style={{
+                position: 'absolute',
+                top: 'calc(50% - 100px)',
+                left: 'calc(50% + 200px',
+            }}
             ref={canvasRef}
             width={300}
             height={200}

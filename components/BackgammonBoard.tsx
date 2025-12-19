@@ -86,7 +86,7 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
       const squareSize = w * 0.85; // Slightly smaller than tray width
       const centerX = x + (w - squareSize) / 2;
       const centerY = y + h / 2;
-      const gap = 10; // Space between the two squares
+      const gap = 36; // Space between the two squares
 
       const drawInlaySquare = (posY) => {
         ctx.save();
@@ -355,7 +355,7 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
     const drawUI = () => {
       // --- Left Panel: Scores ---
       // Top Box
-      drawLCDBox(10, 250, SIDEBAR_WIDTH - 20, 50, p1Score.toString(), '#b25e34');
+      drawLCDBox(15, HEIGHT / 2 - 60 , SIDEBAR_WIDTH - 30 , 30, p1Score.toString(), '#b25e34');
 
       // Center Circle Button
       ctx.beginPath();
@@ -376,12 +376,7 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
       ctx.fillText('1', SIDEBAR_WIDTH / 2, HEIGHT / 2);
 
       // Bottom Box
-      drawLCDBox(10, 400, SIDEBAR_WIDTH - 20, 50, p2Score.toString(), '#b25e34');
-
-      // --- Right Panel: Trays ---
-      // Graphic representation of recessed trays
-      drawRecessedTray(WIDTH - SIDEBAR_WIDTH + 10, 100, SIDEBAR_WIDTH - 20, 200);
-      drawRecessedTray(WIDTH - SIDEBAR_WIDTH + 10, HEIGHT - 300, SIDEBAR_WIDTH - 20, 200);
+      drawLCDBox(15, HEIGHT / 2 + 30, SIDEBAR_WIDTH - 30, 30, p2Score.toString(), '#b25e34');
     };
 
     const drawLCDBox = (x: number, y: number, w: number, h: number, text: string, color: string) => {
@@ -400,23 +395,6 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
       ctx.shadowColor = 'orange';
       ctx.shadowBlur = 5;
       ctx.fillText(text, x + w/2, y + h/2);
-      ctx.restore();
-    };
-
-    const drawRecessedTray = (x: number, y: number, w: number, h: number) => {
-      ctx.save();
-      ctx.fillStyle = '#4a2e1d';
-      ctx.fillRect(x, y, w, h);
-      // Inner shadow
-      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(x, y, w, h);
-      // Bottom Highlight
-      ctx.beginPath();
-      ctx.moveTo(x, y + h);
-      ctx.lineTo(x + w, y + h);
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-      ctx.stroke();
       ctx.restore();
     };
 
@@ -443,7 +421,6 @@ const BackgammonBoard: React.FC<Props> = ({ board, onPointClick, p1Score = 88, p
 
     drawMainBoard()
     drawSideTray(ctx, 10, MARGIN_V, SIDEBAR_WIDTH - 20, HEIGHT - (MARGIN_V * 2));
-    // This matches image_57f202.png positioning
     drawSideTray(ctx, WIDTH - SIDEBAR_WIDTH + 10, MARGIN_V, SIDEBAR_WIDTH - 20, HEIGHT - (MARGIN_V * 2));
     drawPoints();
     drawCheckers();

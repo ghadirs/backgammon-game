@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BackgammonBoard from './components/BackgammonBoard';
 import { Player, BoardState } from './types';
+import DiceCanvas from "@/components/DiceCanvas.tsx";
 
 const INITIAL_BOARD: BoardState = {
   points: [
@@ -69,28 +70,18 @@ const App: React.FC = () => {
         <p className="text-[#a8905a] italic text-lg">A Masterpiece of Strategy & Luck</p>
       </div>
 
+      // Inside App.tsx return statement
       <div className="relative group">
-        <BackgammonBoard 
-          board={board} 
-          onPointClick={handlePointClick}
-          dice={dice}
-          isRolling={isRolling}
+        <BackgammonBoard
+            board={board}
+            onPointClick={handlePointClick}
+            p1Score={88}
+            p2Score={51}
         />
-        
-        {/* Dice Overlay */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-8 pointer-events-none">
-          {dice.map((value, i) => (
-            <div 
-              key={i}
-              className={`w-16 h-16 bg-white rounded-xl shadow-2xl flex items-center justify-center text-3xl font-bold text-slate-900 border-2 border-slate-200 transition-all duration-75 ${isRolling ? 'scale-110 rotate-12 blur-[1px]' : 'scale-100 rotate-0'}`}
-              style={{
-                transform: isRolling ? `rotate(${Math.random() * 360}deg) scale(${1 + Math.random() * 0.2})` : 'none',
-                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
-              }}
-            >
-              <DiceFace value={value} />
-            </div>
-          ))}
+
+        {/* NEW CANVAS DICE OVERLAY */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+          <DiceCanvas dice={dice} isRolling={isRolling} />
         </div>
       </div>
 

@@ -220,6 +220,7 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
         const origin = {x: p.x - (uTop.x + vTop.x) * 0.5, y: p.y - (uTop.y + vTop.y) * 0.5};
 
         ctx.save();
+        
         if (isLanded) {
             ctx.shadowColor = 'rgba(0,0,0,0.2)';
             ctx.shadowBlur = 4;

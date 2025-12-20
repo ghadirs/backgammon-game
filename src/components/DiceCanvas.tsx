@@ -38,15 +38,20 @@ const DiceCanvas: React.FC<DiceProps> = ({ dice, isRolling }) => {
 
     // --- GEOMETRY HELPERS ---
 
-    const rotatePoint = (px: number, py: number, cx: number, cy: number, angle: number): Point => {
-        const cos = Math.cos(angle);
-        const sin = Math.sin(angle);
-        const dx = px - cx;
-        const dy = py - cy;
-        return {
-            x: cx + (dx * cos - dy * sin),
-            y: cy + (dx * sin + dy * cos)
-        };
+    // Helper to draw rounded rectangles within the face coordinate system
+    const fillRoundedRect = (ctx: CanvasRenderingContext2D, r: number) => {
+        ctx.beginPath();
+        ctx.moveTo(r, 0);
+        ctx.lineTo(1 - r, 0);
+        ctx.quadraticCurveTo(1, 0, 1, r);
+        ctx.lineTo(1, 1 - r);
+        ctx.quadraticCurveTo(1, 1, 1 - r, 1);
+        ctx.lineTo(r, 1);
+        ctx.quadraticCurveTo(0, 1, 0, 1 - r);
+        ctx.lineTo(0, r);
+        ctx.quadraticCurveTo(0, 0, r, 0);
+        ctx.closePath();
+        ctx.fill();
     };
 
     // Draws a face by transforming the entire coordinate system to match the face's 3D plane
@@ -54,36 +59,23 @@ const DiceCanvas: React.FC<DiceProps> = ({ dice, isRolling }) => {
         ctx: CanvasRenderingContext2D,
         val: number,
         origin: Point,
-        u: Point, // Vector along the "width" of the face
-        v: Point, // Vector along the "height" of the face
+        u: Point,
+        v: Point,
         bgColor: string,
         dotColor: string
     ) => {
         ctx.save();
-
-        // 1. Apply Affine Transformation
-        // This maps the unit square (0,0) -> (1,1) to our custom parallelogram
         ctx.transform(u.x, u.y, v.x, v.y, origin.x, origin.y);
 
-        // 2. Draw Face Background
+        // 1. Soft Corners Face
         ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, 1, 1); // We draw a simple 1x1 square, the transform stretches it
+        fillRoundedRect(ctx, 0.15); // 0.15 creates a realistic "rounded die" corner
 
-        // 3. Draw Dots
-        // Because of the transform, drawing a perfect circle here results in a
-        // perspectively correct ellipse on the screen!
+        // 2. Dots
         ctx.fillStyle = dotColor;
-        const r = 0.09; // Dot radius (relative to face size 1.0)
-
-        // Dot positions on a 0 to 1 grid
-        const c = 0.5;
-        const l = 0.22;
-        const h = 0.78;
-
+        const r = 0.09, c = 0.5, l = 0.22, h = 0.78;
         const dotsMap: Record<number, number[][]> = {
-            1: [[c, c]],
-            2: [[l, l], [h, h]],
-            3: [[l, l], [c, c], [h, h]],
+            1: [[c, c]], 2: [[l, l], [h, h]], 3: [[l, l], [c, c], [h, h]],
             4: [[l, l], [h, l], [l, h], [h, h]],
             5: [[l, l], [h, l], [c, c], [l, h], [h, h]],
             6: [[l, l], [h, l], [l, c], [h, c], [l, h], [h, h]],
@@ -91,102 +83,71 @@ const DiceCanvas: React.FC<DiceProps> = ({ dice, isRolling }) => {
 
         ctx.beginPath();
         dotsMap[val]?.forEach(([dx, dy]) => {
-            // Draw circle. The context skew makes it look 3D.
-            ctx.moveTo(dx + r, dy); // optimization to avoid connecting lines
+            ctx.moveTo(dx + r, dy);
             ctx.arc(dx, dy, r, 0, Math.PI * 2);
         });
         ctx.fill();
-
-        // Optional: Bevel Edge inside the face
-        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-        ctx.lineWidth = 0.02;
-        ctx.strokeRect(0, 0, 1, 1);
-
         ctx.restore();
     };
-
     const drawSolidCube = (ctx: CanvasRenderingContext2D, p: DiePhysics, finalVal: number) => {
-        // Chaos rolling values
         const tVal = isRolling ? Math.floor(Math.random() * 6) + 1 : finalVal;
-        const rVal = isRolling ? Math.floor(Math.random() * 6) + 1 : (finalVal % 6) + 1;
-        const bVal = isRolling ? Math.floor(Math.random() * 6) + 1 : ((finalVal + 1) % 6) + 1;
+        const isLanded = !isRolling && p.altitude < 0.1;
 
         const scale = 1 + (p.altitude / 300);
-        const s = 44 * scale; // Cube side length
-        const d = 14 * scale; // Cube depth (thickness)
+        const s = 44 * scale;
+        const d = isLanded ? 0 : 14 * scale;
+        const rad = isLanded ? Math.round(p.angle / (Math.PI / 2)) * (Math.PI / 2) : p.angle;
 
-        // 1. Calculate Top Face Vectors (Rotation)
-        const rad = p.angle;
-        // uTop = Vector along top edge
         const uTop = { x: Math.cos(rad) * s, y: Math.sin(rad) * s };
-        // vTop = Vector along left edge (perpendicular)
         const vTop = { x: Math.cos(rad + Math.PI/2) * s, y: Math.sin(rad + Math.PI/2) * s };
-
-        // 2. Depth Vector (fixed perspective)
         const depthVec = { x: d * 0.6, y: d * 0.8 };
 
-        // 3. Origin Point (Top-Left corner of the top face)
-        // We calculate this relative to center (p.x, p.y)
         const origin = {
             x: p.x - (uTop.x + vTop.x) * 0.5,
             y: p.y - (uTop.y + vTop.y) * 0.5
         };
 
-        // Vertices for Shadow Calculation
-        const p0 = origin;
-        const p1 = { x: origin.x + uTop.x, y: origin.y + uTop.y }; // Top Right
-        const p2 = { x: p1.x + vTop.x, y: p1.y + vTop.y }; // Bottom Right
-        const p3 = { x: origin.x + vTop.x, y: origin.y + vTop.y }; // Bottom Left
-
-        // --- SHADOW (Real Blur) ---
+        // --- SHADOW LOGIC (SHARPENED) ---
         ctx.save();
-        // Shift shadow based on altitude
-        const shX = p.altitude / 6;
-        const shY = 15 + p.altitude / 2.5;
+        if (isLanded) {
+            // Tight, clear contact shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 4; // Reduced from 10 for sharpness
+            ctx.shadowOffsetX = 1;
+            ctx.shadowOffsetY = 2;
+        } else {
+            const shX = p.altitude / 8;
+            const shY = 10 + p.altitude / 3;
+            ctx.translate(shX, shY);
 
-        ctx.translate(shX, shY);
-        // Apply Gaussian Blur
-        // Note: 'filter' works in most modern browsers. Fallback logic isn't included here for brevity.
-        ctx.filter = `blur(${8 + p.altitude / 10}px)`;
-        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            // CAP THE BLUR:
+            // We limit the blur to a max of 4px so it doesn't get "muddy"
+            const blurAmount = Math.min(4, p.altitude / 40);
+            ctx.filter = `blur(${blurAmount}px)`;
 
-        // Draw Hull of the cube for shadow
-        ctx.beginPath();
-        ctx.moveTo(p0.x, p0.y);
-        ctx.lineTo(p1.x, p1.y);
-        ctx.lineTo(p1.x + depthVec.x, p1.y + depthVec.y);
-        ctx.lineTo(p2.x + depthVec.x, p2.y + depthVec.y);
-        ctx.lineTo(p3.x + depthVec.x, p3.y + depthVec.y);
-        ctx.lineTo(p3.x, p3.y);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
+            ctx.fillStyle = 'rgba(0,0,0,0.25)';
+            ctx.beginPath();
+            const p1 = { x: origin.x + uTop.x, y: origin.y + uTop.y };
+            const p3 = { x: origin.x + vTop.x, y: origin.y + vTop.y };
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(p1.x, p1.y);
+            ctx.lineTo(p1.x + depthVec.x, p1.y + depthVec.y);
+            ctx.lineTo(p3.x + uTop.x + depthVec.x, p3.y + uTop.y + depthVec.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.fill();
+        }
+        ctx.restore(); // CRITICAL: This ensures the blur doesn't bleed into the die faces
 
-        // --- DRAW FACES ---
-        // We draw Back-to-Front painter's algorithm order is tricky with rotation,
-        // but for this specific perspective (Top-Right-Bottom visible), this order works:
+        // --- DRAW FACES (STAYS SHARP) ---
+        if (!isLanded) {
+            const rVal = ((tVal) % 6) + 1;
+            const bVal = ((tVal + 1) % 6) + 1;
+            drawFace(ctx, rVal, {x: origin.x + uTop.x, y: origin.y + uTop.y}, depthVec, vTop, '#cbd5e1', '#475569');
+            drawFace(ctx, bVal, {x: origin.x + vTop.x, y: origin.y + vTop.y}, uTop, depthVec, '#94a3b8', '#334155');
+        }
 
-        // 1. Right Face (Connects to the "Right" edge of top face: p1 -> p2)
-        // Origin: p1. Width Vector: depthVec. Height Vector: vTop.
-        drawFace(ctx, rVal, p1, depthVec, vTop, '#cbd5e1', '#475569');
-
-        // 2. Bottom/Front Face (Connects to "Bottom" edge of top face: p3 -> p2)
-        // Origin: p3. Width Vector: uTop. Height Vector: depthVec.
-        drawFace(ctx, bVal, p3, uTop, depthVec, '#94a3b8', '#334155');
-
-        // 3. Top Face (The main one)
         drawFace(ctx, tVal, origin, uTop, vTop, '#ffffff', '#1e293b');
-
-        // Highlight Stroke for Top Face
-        ctx.save();
-        ctx.transform(uTop.x, uTop.y, vTop.x, vTop.y, origin.x, origin.y);
-        ctx.strokeStyle = '#f8fafc';
-        ctx.lineWidth = 0.04;
-        ctx.strokeRect(0,0,1,1);
-        ctx.restore();
-    };
-
-    useEffect(() => { if (isRolling) resetPhysics(); }, [isRolling]);
+    };    useEffect(() => { if (isRolling) resetPhysics(); }, [isRolling]);
 
     useEffect(() => {
         const canvas = canvasRef.current;

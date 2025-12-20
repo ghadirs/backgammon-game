@@ -5,7 +5,7 @@ import {CheckCircle2, LogOut, Undo2, Volume2} from 'lucide-react';
 import BackgammonBoard from '@/components/BackgammonBoard';
 import DiceCanvas from "@/components/DiceCanvas";
 import {BoardState, Player} from '@/types';
-import styles from './gameplay.module.scss';
+import styles from './Gameplay.module.scss';
 import {Toggle} from "@/components/Toggle.tsx";
 import {Button} from "@/components/Button.tsx";
 import {PlayerAvatar} from "@/components/PlayerAvatar.tsx";
@@ -76,7 +76,7 @@ export default function GameplayPage() {
                             p2Score={51}
                         />
                         <div className={styles.diceOverlay} onClick={() => rollDice()}>
-                            <DiceCanvas dice={dice} isRolling={isRolling}/>
+                            <DiceCanvas dice={dice} rollDice={() => rollDice()} isRolling={isRolling}/>
                         </div>
                     </div>
                 </section>
@@ -93,7 +93,7 @@ export default function GameplayPage() {
 
                     <div className={styles.actionColumn}>
                         <Button label="Undo" icon={<Undo2 size={18}/>}/>
-                        <Button label="Done" icon={<CheckCircle2 size={18}/>}/>
+                        <Button label="Done" icon={<CheckCircle2 size={18}/>} onClick={() => rollDice()}/>
                     </div>
 
                     <footer className={styles.footerActions}>

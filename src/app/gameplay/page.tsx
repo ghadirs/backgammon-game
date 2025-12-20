@@ -10,6 +10,7 @@ import {Toggle} from "@/components/Toggle.tsx";
 import {Button} from "@/components/Button.tsx";
 import {PlayerAvatar} from "@/components/PlayerAvatar.tsx";
 import ThreeDiceCanvas from "@/components/DiceCanvas";
+import GameBoard from "@/components/GameBoard.tsx";
 
 const INITIAL_BOARD: BoardState = {
     points: [-2, 0, 0, 0, 0, 5, 0, 3, 0, 0, 0, -5, 5, 0, 0, 0, 0, -3, 0, 5, 0, 0, 0, 2],
@@ -71,14 +72,13 @@ export default function GameplayPage() {
                 {/* CENTER BOARD */}
                 <section className={styles.boardContainer}>
                     <div className={styles.boardOuterFrame}>
-                        <BackgammonBoard
+                        <GameBoard
+                            isRolling={isRolling}
+                            diceValues={dice}
                             board={board}
                             p1Score={88}
                             p2Score={51}
                         />
-                        <div className={styles.diceOverlay} onClick={() => rollDice()}>
-                            <ThreeDiceCanvas dice={dice} isRolling={isRolling}/>
-                        </div>
                     </div>
                 </section>
 

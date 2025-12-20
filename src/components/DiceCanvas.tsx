@@ -237,8 +237,8 @@ const DiceCanvas: React.FC<DiceProps> = ({ dice, isRolling }) => {
     }, [dice, isRolling]);
 
     return (
-        <canvas ref={canvasRef} width={600} height={400}
-                style={{ position: 'absolute', top: '50%', left: '25%', transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 100 }}
+        <canvas ref={canvasRef} width={450} height={700}
+                style={{ position: 'absolute', top: '50%', left: 'calc(25% + 30px)', transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 100 }}
         />
     );
 };

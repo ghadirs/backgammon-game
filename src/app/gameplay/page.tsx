@@ -2,14 +2,11 @@
 
 import React, {useEffect, useState} from 'react';
 import {CheckCircle2, LogOut, Undo2, Volume2} from 'lucide-react';
-import BackgammonBoard from '@/components/BackgammonBoard';
-import DiceCanvas from "@/components/DiceCanvas";
 import {BoardState, Player} from '@/types';
 import styles from './Gameplay.module.scss';
 import {Toggle} from "@/components/Toggle.tsx";
 import {Button} from "@/components/Button.tsx";
 import {PlayerAvatar} from "@/components/PlayerAvatar.tsx";
-import ThreeDiceCanvas from "@/components/DiceCanvas";
 import GameBoard from "@/components/GameBoard.tsx";
 
 const INITIAL_BOARD: BoardState = {

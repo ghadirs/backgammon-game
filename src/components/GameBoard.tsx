@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
+import style from './GameBoard.module.scss';
 import {BoardState} from '@/types';
 
 interface Props {
@@ -220,7 +221,7 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
         const origin = {x: p.x - (uTop.x + vTop.x) * 0.5, y: p.y - (uTop.y + vTop.y) * 0.5};
 
         ctx.save();
-        
+
         if (isLanded) {
             ctx.shadowColor = 'rgba(0,0,0,0.2)';
             ctx.shadowBlur = 4;
@@ -495,7 +496,7 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
     return (
         <div className="flex justify-center items-center p-4 bg-[#1a1a1a] min-h-screen">
             <canvas ref={canvasRef} width={WIDTH} height={HEIGHT}
-                    className="rounded-lg shadow-2xl border border-[#3e2315]"/>
+                    className={style.gameBoard}/>
         </div>
     );
 };

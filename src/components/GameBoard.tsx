@@ -57,6 +57,32 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
     const POINT_H = HEIGHT * 0.4;
 
     // --- Drage and Drop
+    const getInternalCoords = (e: React.MouseEvent | React.TouchEvent) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return {x: 0, y: 0};
+
+        const rect = canvas.getBoundingClientRect();
+        let clientX, clientY;
+
+        // Detect if Touch or Mouse
+        if ('touches' in e && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            const mouseEvt = e as React.MouseEvent;
+            clientX = mouseEvt.clientX;
+            clientY = mouseEvt.clientY;
+        }
+
+        // Map screen pixels to internal 1100x700 units
+        const scaleX = WIDTH / rect.width;
+        const scaleY = HEIGHT / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    };
     const getPointAtCoords = (mx: number, my: number) => {
         // Determine if mouse is in the upper or lower half
         const isTopHalf = my < HEIGHT / 2;
@@ -76,12 +102,8 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
 
         return -1;
     };
-    const onMouseDown = (e: React.MouseEvent) => {
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
+    // Refactor your existing MouseDown logic into this helper:
+    const handleStartDragging = (x: number, y: number) => {
         const pointIdx = getPointAtCoords(x, y);
         if (pointIdx !== -1 && board.points[pointIdx] !== 0) {
             dragRef.current = {
@@ -94,12 +116,33 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
         }
     };
 
+    const onMouseDown = (e: React.MouseEvent) => {
+        const {x, y} = getInternalCoords(e);
+        handleStartDragging(x, y);
+    };
+
     const onMouseMove = (e: React.MouseEvent) => {
         if (!dragRef.current) return;
         const rect = canvasRef.current?.getBoundingClientRect();
         if (!rect) return;
-        dragRef.current.currentX = e.clientX - rect.left;
-        dragRef.current.currentY = e.clientY - rect.top;
+        const {x, y} = getInternalCoords(e); // Use the scale-aware helper
+        dragRef.current.currentX = x;
+        dragRef.current.currentY = y;
+    };
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        const {x, y} = getInternalCoords(e);
+        handleStartDragging(x, y);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        // Prevent the browser from bouncing/scrolling during the game
+        if (e.cancelable) e.preventDefault();
+        const {x, y} = getInternalCoords(e);
+        if (dragRef.current) {
+            dragRef.current.currentX = x;
+            dragRef.current.currentY = y;
+        }
     };
 
     const onMouseUp = () => {
@@ -653,12 +696,21 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
 
 
     return (
-        <div className="flex justify-center items-center p-4 bg-[#1a1a1a] min-h-screen">
-            <canvas ref={canvasRef} onMouseDown={onMouseDown}
-                    onMouseMove={onMouseMove}
-                    onMouseUp={onMouseUp}
-                    onMouseLeave={onMouseUp} width={WIDTH} height={HEIGHT}
-                    className={style.gameBoard}/>
+        <div className="flex justify-center items-center p-2 sm:p-4 bg-[#1a1a1a] w-full h-full max-h-[90vh]">
+            <div
+                style={{borderRadius: '12px', overflow: 'hidden'}}
+                className="shadow-2xl border border-[#3e2315] w-full max-w-[1100px] aspect-[11/7] relative">
+                <canvas ref={canvasRef}// Mouse Events
+                        onMouseDown={onMouseDown}
+                        onMouseMove={onMouseMove}
+                        onMouseUp={onMouseUp}
+                        onMouseLeave={onMouseUp}
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onMouseUp}
+                        width={WIDTH} height={HEIGHT}
+                        className={`w-full h-full block touch-none ${style.gameBoard}`}/>
+            </div>
         </div>
     );
 };

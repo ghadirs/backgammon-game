@@ -491,6 +491,11 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
             ctx.drawImage(boardCache.current!, 0, 0);
 
+            // --- TURN HIGHLIGHT LOGIC ---
+            // Change this logic based on your actual turn variable (e.g., board.currentPlayer)
+            const currentPlayer = board.;
+            const isBottomTurn = currentPlayer === 1;
+
             // 3. DRAW DYNAMIC STUFF
             drawLCDBox(ctx, 15, HEIGHT / 2 - 60, SIDEBAR_WIDTH - 30, 30, p1Score.toString(), '#b25e34');
 

@@ -8,6 +8,8 @@ interface Props {
     isRolling: boolean;
     p1Score?: number;
     p2Score?: number;
+    currentPlayer: number;
+    setCurrentPlayer: (currentPlayer: number) => void;
 }
 
 interface Point {
@@ -35,7 +37,15 @@ interface DiePhysics {
     vAltitude: number;
 }
 
-const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score = 88, p2Score = 51}) => {
+const BackgammonBoard: React.FC<Props> = ({
+                                              board,
+                                              diceValues,
+                                              isRolling,
+                                              p1Score = 88,
+                                              p2Score = 51,
+                                              currentPlayer,
+                                              setCurrentPlayer
+                                          }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const boardCache = useRef<HTMLCanvasElement | null>(null);
     const requestRef = useRef<number>();
@@ -493,7 +503,6 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
 
             // --- TURN HIGHLIGHT LOGIC ---
             // Change this logic based on your actual turn variable (e.g., board.currentPlayer)
-            const currentPlayer = board.;
             const isBottomTurn = currentPlayer === 1;
 
             // 3. DRAW DYNAMIC STUFF
@@ -516,6 +525,42 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
             ctx.fillText('1', SIDEBAR_WIDTH / 2, HEIGHT / 2 + 5);
 
             drawLCDBox(ctx, 15, HEIGHT / 2 + 30, SIDEBAR_WIDTH - 30, 30, p2Score.toString(), '#b25e34');
+
+            ctx.save();
+            // 1. Calculate the pulse value FIRST (oscillates opacity between 0.1 and 0.4)
+            const pulse = 0.4 + Math.sin(Date.now() / 500) * 0.15; // Oscillates between 0.05 and 0.15
+            const glowHeight = HEIGHT * 0.45; // Glow covers roughly half the board height
+            const highlightGrad = ctx.createLinearGradient(0, isBottomTurn ? HEIGHT : 0, 0, isBottomTurn ? HEIGHT - glowHeight : glowHeight);
+
+            // 2. Create the gradient
+            highlightGrad.addColorStop(0, 'rgba(0, 150, 255, 0.75)');
+            highlightGrad.addColorStop(1, 'rgba(0, 150, 255, 0)');
+
+            // 3. Apply the dynamic pulse to the gradient stops
+            highlightGrad.addColorStop(0, `rgba(0, 150, 255, ${pulse})`);
+
+            // 4. Fill the rectangle
+            ctx.fillStyle = highlightGrad;
+            if (isBottomTurn) {
+                ctx.fillRect(SIDEBAR_WIDTH, HEIGHT - glowHeight, PLAY_AREA_WIDTH + BAR_WIDTH, glowHeight);
+            } else {
+                ctx.fillRect(SIDEBAR_WIDTH, 0, PLAY_AREA_WIDTH + BAR_WIDTH, glowHeight);
+            }
+            ctx.restore();
+
+            // 5. Draw the glowing edge line (also pulsing!)
+            ctx.strokeStyle = 'rgba(0, 180, 255, 0.4)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            if (isBottomTurn) {
+                ctx.moveTo(SIDEBAR_WIDTH, HEIGHT - 2);
+                ctx.lineTo(WIDTH - SIDEBAR_WIDTH, HEIGHT - 2);
+            } else {
+                ctx.moveTo(SIDEBAR_WIDTH, 2);
+                ctx.lineTo(WIDTH - SIDEBAR_WIDTH, 2);
+            }
+            ctx.stroke();
+
 
             // Checkers
             // 2. Draw Checkers on Points

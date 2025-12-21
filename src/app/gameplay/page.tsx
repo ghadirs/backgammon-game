@@ -19,7 +19,7 @@ export default function GameplayPage() {
     const [dice, setDice] = useState<number[]>([1, 1]);
     const [autoRoll, setAutoRoll] = useState<boolean>(true);
     const [isRolling, setIsRolling] = useState(false);
-    const [currentPlayer, setCurrentPlayer] = useState<Player>(Player.White);
+    const [currentPlayer, setCurrentPlayer] = useState<number>(1);
     const [hasMounted, setHasMounted] = useState(false);
 
     // Fix for Hydration Mismatch
@@ -75,6 +75,8 @@ export default function GameplayPage() {
                             board={board}
                             p1Score={88}
                             p2Score={51}
+                            currentPlayer={currentPlayer}
+                            setCurrentPlayer={setCurrentPlayer}
                         />
                     </div>
                 </section>

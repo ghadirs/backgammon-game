@@ -191,6 +191,8 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
     const drawFace = (ctx: CanvasRenderingContext2D, val: number, origin: Point, u: Point, v: Point, bgColor: string, dotColor: string) => {
         ctx.save();
         ctx.transform(u.x, u.y, v.x, v.y, origin.x, origin.y);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+        ctx.shadowBlur = 12;
         ctx.fillStyle = bgColor;
         fillRoundedRect(ctx, 0.15);
         ctx.fillStyle = dotColor;

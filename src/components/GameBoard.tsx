@@ -52,23 +52,21 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
     ]);
 
     const resetDice = () => {
-        // Randomly choose Left (0) or Right (1) side for this roll
-        const sideChoice = Math.random() > 0.5 ? 1 : 0;
+        const fromSide = Math.random() > 0.5 ? 1 : 0;
 
-        const startXBase = sideChoice === 0
-            ? SIDEBAR_WIDTH + (QUADRANT_WIDTH / 2)
-            : SIDEBAR_WIDTH + QUADRANT_WIDTH + BAR_WIDTH + (QUADRANT_WIDTH / 2);
+        dicePhysics.current.forEach((p, i) => {
+            p.x = fromSide === 1 ? WIDTH + 100 : -100;
 
-        dicePhysics.current.slice(0, 2).forEach((p, i) => {
-            // Offset them slightly so they don't overlap perfectly at the start
-            p.x = startXBase + (i === 0 ? -40 : 40);
-            p.y = HEIGHT / 2;
+            // Aim for the vertical center (the gutter) to avoid initial checker hits
+            p.y = HEIGHT / 2 + (i === 0 ? -30 : 30);
 
-            p.vx = (Math.random() - 0.5) * 10;
-            p.vy = (Math.random() - 0.5) * 4;
-            p.vAngle = 0.2 + Math.random() * 0.3;
-            p.altitude = 180;
-            p.vAltitude = 4;
+            const speed = 40 + Math.random() * 10;
+            p.vx = fromSide === 1 ? -speed : speed;
+            p.vy = (Math.random() - 0.5) * 5; // Low vertical spread
+
+            p.altitude = 100;
+            p.vAltitude = 8;
+            p.vAngle = 0.9;
         });
     };
     useEffect(() => {
@@ -447,6 +445,42 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
                         d2.vx *= -0.5;
                         d2.vy *= -0.5;
                     }
+
+                    // Inside dicePhysics.current.forEach...
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+// --- NEW: Checker Collision Avoidance ---
+                    board.points.forEach((count, i) => {
+                        if (count === 0) return;
+
+                        // Calculate the center of this point stack
+                        const isTop = i >= 12;
+                        let xBase = (i < 6) ? WIDTH - SIDEBAR_WIDTH - (i + 0.5) * POINT_W :
+                            (i < 12) ? SIDEBAR_WIDTH + (11 - i + 0.5) * POINT_W :
+                                (i < 18) ? SIDEBAR_WIDTH + (i - 12 + 0.5) * POINT_W :
+                                    WIDTH - SIDEBAR_WIDTH - (23 - i + 0.5) * POINT_W;
+
+                        const absCount = Math.abs(count);
+                        const CHECKER_R = POINT_W * 0.43;
+                        const stackHeight = Math.min(absCount * CHECKER_R * 2, POINT_H);
+
+                        // Check distance between die and checker stack center
+                        const dx = p.x - xBase;
+                        const dy = isTop ? (p.y - (MARGIN_V + stackHeight / 2)) : (p.y - (HEIGHT - MARGIN_V - stackHeight / 2));
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        // If die is too close to a stack, push it away horizontally
+                        const minSafeDist = CHECKER_R + 25;
+                        if (dist < minSafeDist && p.altitude < 10) {
+                            const overlap = minSafeDist - dist;
+                            const nx = dx / dist;
+
+                            // Push die toward the gaps between points
+                            p.x += nx * overlap;
+                            p.vx *= -0.5; // Add a little bounce effect
+                        }
+                    });
 
                     // Boundaries (Force same quadrant)
                     const isRightSide = p.x > (WIDTH / 2);

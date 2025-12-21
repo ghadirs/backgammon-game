@@ -15,6 +15,15 @@ interface Point {
     y: number;
 }
 
+interface DragState {
+    pointIndex: number;
+    color: number; // 1 for light, -1 for dark
+    startX: number;
+    startY: number;
+    currentX: number;
+    currentY: number;
+}
+
 interface DiePhysics {
     x: number;
     y: number;
@@ -30,7 +39,9 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const boardCache = useRef<HTMLCanvasElement | null>(null);
     const requestRef = useRef<number>();
+    const dragRef = useRef<DragState | null>(null);
 
+    const [isDragging, setIsDragging] = useState(false); // Only for forcing re-renders if needed
     const [isClient, setIsClient] = useState(false);
 
     // --- DIMENSIONS ---
@@ -45,6 +56,89 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
     const POINT_W = QUADRANT_WIDTH / 6;
     const POINT_H = HEIGHT * 0.4;
 
+    // --- Drage and Drop
+    const getPointAtCoords = (mx: number, my: number) => {
+        // Determine if mouse is in the upper or lower half
+        const isTopHalf = my < HEIGHT / 2;
+
+        // Check horizontal zones
+        const leftQuadrant = mx > SIDEBAR_WIDTH && mx < SIDEBAR_WIDTH + QUADRANT_WIDTH;
+        const rightQuadrant = mx > WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH && mx < WIDTH - SIDEBAR_WIDTH;
+
+        if (isTopHalf) {
+            if (leftQuadrant) return 12 + Math.floor((mx - SIDEBAR_WIDTH) / POINT_W);
+            if (rightQuadrant) return 18 + Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / POINT_W);
+        } else {
+            // Bottom row indices are reversed (0-11)
+            if (rightQuadrant) return 5 - Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / POINT_W);
+            if (leftQuadrant) return 11 - Math.floor((mx - SIDEBAR_WIDTH) / POINT_W);
+        }
+
+        return -1;
+    };
+    const onMouseDown = (e: React.MouseEvent) => {
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const pointIdx = getPointAtCoords(x, y);
+        if (pointIdx !== -1 && board.points[pointIdx] !== 0) {
+            dragRef.current = {
+                pointIndex: pointIdx,
+                color: Math.sign(board.points[pointIdx]),
+                startX: x, startY: y,
+                currentX: x, currentY: y
+            };
+            setIsDragging(true);
+        }
+    };
+
+    const onMouseMove = (e: React.MouseEvent) => {
+        if (!dragRef.current) return;
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        dragRef.current.currentX = e.clientX - rect.left;
+        dragRef.current.currentY = e.clientY - rect.top;
+    };
+
+    const onMouseUp = () => {
+        if (!dragRef.current) return;
+
+        const {pointIndex: sourceIdx, color, currentX, currentY} = dragRef.current;
+        const targetIdx = getPointAtCoords(currentX, currentY);
+
+        // 1. Check if we dropped it on a valid triangle
+        if (targetIdx !== -1 && targetIdx !== sourceIdx) {
+            const targetCount = board.points[targetIdx];
+            const targetColor = Math.sign(targetCount);
+
+            // 2. VALIDATION RULES:
+            // Rule A: Target is empty
+            // Rule B: Target has your own color
+            // Rule C: Target has exactly ONE opponent checker (a "blot")
+            const isOpponentColor = targetColor !== 0 && targetColor !== color;
+            const isOccupiedByManyOpponents = isOpponentColor && Math.abs(targetCount) > 1;
+
+            if (!isOccupiedByManyOpponents) {
+                // SUCCESS: Move is valid
+                // Note: In a real app, you'd call an API or use a dispatch here.
+                // For now, we update the local board state:
+                board.points[sourceIdx] -= color;
+
+                if (isOpponentColor && Math.abs(targetCount) === 1) {
+                    // HIT: Opponent checker goes to the bar (logic for bar needed)
+                    board.points[targetIdx] = color;
+                } else {
+                    board.points[targetIdx] += color;
+                }
+            }
+        }
+
+        // Reset dragging state
+        dragRef.current = null;
+        setIsDragging(false);
+    };
     // --- DICE PHYSICS STATE ---
     const dicePhysics = useRef<DiePhysics[]>([
         {x: 350, y: 350, vx: 0, vy: 0, angle: 0, vAngle: 0, altitude: 0, vAltitude: 0},
@@ -376,6 +470,7 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
             drawLCDBox(ctx, 15, HEIGHT / 2 + 30, SIDEBAR_WIDTH - 30, 30, p2Score.toString(), '#b25e34');
 
             // Checkers
+            // 2. Draw Checkers on Points
             const CHECKER_R = POINT_W * 0.43;
             board.points.forEach((count, i) => {
                 if (count === 0) return;
@@ -385,7 +480,12 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
                         (i < 18) ? SIDEBAR_WIDTH + (i - 12 + 0.5) * POINT_W :
                             WIDTH - SIDEBAR_WIDTH - (23 - i + 0.5) * POINT_W;
 
-                const absCount = Math.abs(count);
+                let absCount = Math.abs(count);
+                // If we are dragging from this point, hide one checker from the stack
+                if (dragRef.current && dragRef.current.pointIndex === i) {
+                    absCount--;
+                }
+
                 const spacing = Math.min(CHECKER_R * 2 + 2, (POINT_H - CHECKER_R) / Math.max(1, absCount - 1));
 
                 for (let j = 0; j < absCount; j++) {
@@ -400,6 +500,29 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
                     ctx.restore();
                 }
             });
+
+// 3. DRAW HELD CHECKER (Outside the loop, at the end)
+            if (dragRef.current) {
+                const d = dragRef.current;
+                ctx.save();
+                // Lifted effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowOffsetY = 15;
+
+                ctx.beginPath();
+                // Scale slightly larger to look "closer" to the camera
+                ctx.arc(d.currentX, d.currentY, CHECKER_R * 1.05, 0, Math.PI * 2);
+                ctx.fillStyle = d.color < 0 ? '#190802' : '#9B5A3D';
+                ctx.fill();
+
+                // Add a highlight ring
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+
 
             // 4. Update & Draw 2 DICE
             dicePhysics.current.slice(0, 2).forEach((p, i) => {
@@ -531,7 +654,10 @@ const BackgammonBoard: React.FC<Props> = ({board, diceValues, isRolling, p1Score
 
     return (
         <div className="flex justify-center items-center p-4 bg-[#1a1a1a] min-h-screen">
-            <canvas ref={canvasRef} width={WIDTH} height={HEIGHT}
+            <canvas ref={canvasRef} onMouseDown={onMouseDown}
+                    onMouseMove={onMouseMove}
+                    onMouseUp={onMouseUp}
+                    onMouseLeave={onMouseUp} width={WIDTH} height={HEIGHT}
                     className={style.gameBoard}/>
         </div>
     );

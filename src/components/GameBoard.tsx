@@ -127,9 +127,9 @@ const BackgammonBoard: React.FC<Props> = ({
     };
 
     const executeAutoMove = (fromIdx: number) => {
-        // IMPORTANT: Player 1 (Light/1) moves from index 0 towards 23 (CW)
-        // Player 2 (Dark/-1) moves from index 23 towards 0 (CCW)
-        // Adjust these multipliers based on your specific BoardState mapping
+        // Only allow move if we aren't already animating one
+        if (animatingChecker) return;
+
         const moveDir = currentPlayer === 1 ? 1 : -1;
 
         for (const die of diceValues) {
@@ -137,24 +137,24 @@ const BackgammonBoard: React.FC<Props> = ({
 
             const toIdx = fromIdx + (die * moveDir);
 
-
-            // Check if toIdx is on board
             if (toIdx >= 0 && toIdx <= 23) {
                 const targetCount = board.points[toIdx];
                 const isOpponent = targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
 
+                // Basic Backgammon rule: Can move if point is yours, empty, or a blot (1 opponent)
                 if (Math.sign(targetCount) === currentPlayer || Math.abs(targetCount) <= 1) {
                     const newPoints = [...board.points];
 
-                    // Calculate Start and End pixels for the animation
-                    // Note: You need helper functions to get X/Y from index
+                    // Calculate Start and End pixels BEFORE we change the array
                     const startPos = getCheckerPixels(fromIdx, Math.abs(board.points[fromIdx]) - 1);
 
-
-                    // Remove checker from start
-                    newPoints[fromIdx] -= currentPlayer;
+                    // Calculate destination stack height
+                    // If it's an opponent blot, the new checker will sit at index 0
+                    const destStackIdx = isOpponent ? 0 : Math.abs(board.points[toIdx]);
+                    const endPos = getCheckerPixels(toIdx, destStackIdx);
 
                     // Update the logical state for AFTER the animation
+                    newPoints[fromIdx] -= currentPlayer;
                     if (isOpponent && Math.abs(targetCount) === 1) {
                         newPoints[toIdx] = currentPlayer;
                         // Note: In a real game, you'd move the opponent to the bar here
@@ -168,19 +168,17 @@ const BackgammonBoard: React.FC<Props> = ({
                         fromY: startPos.y,
                         toX: endPos.x,
                         toY: endPos.y,
+                        fromIdx: fromIdx, // Pass the index here
                         color: currentPlayer,
                         startTime: performance.now(),
                         newPoints: newPoints
                     });
 
-                    break;
-
-
+                    break; // Use only the first valid die found
                 }
             }
         }
     };
-
     // --- DICE PHYSICS STATE ---
     const dicePhysics = useRef<DiePhysics[]>([
         {x: 350, y: 350, vx: 0, vy: 0, angle: 0, vAngle: 0, altitude: 0, vAltitude: 0},
@@ -574,7 +572,7 @@ const BackgammonBoard: React.FC<Props> = ({
                         j === absCount - 1;
 
                     if (isAnimatingThisPoint) continue;
-                    
+
                     const y = isTop ? MARGIN_V + CHECKER_R + 5 + j * spacing : HEIGHT - MARGIN_V - CHECKER_R - 5 - j * spacing;
                     ctx.save();
 

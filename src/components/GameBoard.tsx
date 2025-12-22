@@ -10,20 +10,12 @@ interface Props {
     p2Score?: number;
     currentPlayer: number;
     setCurrentPlayer: (currentPlayer: number) => void;
+    onMoveExecuted?: (newPoints: number[]) => void;
 }
 
 interface Point {
     x: number;
     y: number;
-}
-
-interface DragState {
-    pointIndex: number;
-    color: number; // 1 for light, -1 for dark
-    startX: number;
-    startY: number;
-    currentX: number;
-    currentY: number;
 }
 
 interface DiePhysics {
@@ -44,7 +36,7 @@ const BackgammonBoard: React.FC<Props> = ({
                                               p1Score = 88,
                                               p2Score = 51,
                                               currentPlayer,
-                                              setCurrentPlayer
+                                              onMoveExecuted
                                           }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const boardCache = useRef<HTMLCanvasElement | null>(null);
@@ -53,6 +45,19 @@ const BackgammonBoard: React.FC<Props> = ({
     // Pulse animation for state "Available moves"
     const pulseRef = useRef(0);
     const [isClient, setIsClient] = useState(false);
+
+    // Track the checker currently in flight
+    const [animatingChecker, setAnimatingChecker] = useState<{
+        fromX: number;
+        fromY: number;
+        toX: number;
+        toY: number;
+        color: number;
+        startTime: number;
+        newPoints: number[]; // Store the final state to apply after animation
+    } | null>(null);
+
+    const ANIMATION_DURATION = 300; // ms
 
     // --- DIMENSIONS ---
     const WIDTH = 1100;
@@ -65,6 +70,20 @@ const BackgammonBoard: React.FC<Props> = ({
     const QUADRANT_WIDTH = PLAY_AREA_WIDTH / 2;
     const POINT_W = QUADRANT_WIDTH / 6;
     const POINT_H = HEIGHT * 0.4;
+    const CHECKER_R = POINT_W * 0.43;
+
+    const getCheckerPixels = (i: number, stackIdx: number) => {
+        const isTop = i >= 12;
+        let xBase = (i < 6) ? WIDTH - SIDEBAR_WIDTH - (i + 0.5) * POINT_W :
+            (i < 12) ? SIDEBAR_WIDTH + (11 - i + 0.5) * POINT_W :
+                (i < 18) ? SIDEBAR_WIDTH + (i - 12 + 0.5) * POINT_W :
+                    WIDTH - SIDEBAR_WIDTH - (23 - i + 0.5) * POINT_W;
+
+        const spacing = Math.min(CHECKER_R * 2 + 2, (POINT_H - CHECKER_R) / 5);
+        const y = isTop ? MARGIN_V + CHECKER_R + 5 + stackIdx * spacing :
+            HEIGHT - MARGIN_V - CHECKER_R - 5 - stackIdx * spacing;
+        return {x: xBase, y};
+    };
 
     // --- HELPER: CLICK DETECTION ---
     const getInternalCoords = (e: React.MouseEvent) => {
@@ -108,32 +127,55 @@ const BackgammonBoard: React.FC<Props> = ({
     };
 
     const executeAutoMove = (fromIdx: number) => {
-        // Find a valid move using the dice values in order
-        const moveDir = currentPlayer; // 1 moves forward, -1 moves backward (adjust based on your logic)
+        // IMPORTANT: Player 1 (Light/1) moves from index 0 towards 23 (CW)
+        // Player 2 (Dark/-1) moves from index 23 towards 0 (CCW)
+        // Adjust these multipliers based on your specific BoardState mapping
+        const moveDir = currentPlayer === 1 ? 1 : -1;
 
         for (const die of diceValues) {
             if (die === 0) continue;
 
             const toIdx = fromIdx + (die * moveDir);
 
+
             // Check if toIdx is on board
             if (toIdx >= 0 && toIdx <= 23) {
                 const targetCount = board.points[toIdx];
                 const isOpponent = targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
 
-                // Move is valid if target is empty, same color, or a blot (1 opponent)
-                if (!isOpponent || Math.abs(targetCount) === 1) {
+                if (Math.sign(targetCount) === currentPlayer || Math.abs(targetCount) <= 1) {
                     const newPoints = [...board.points];
+
+                    // Calculate Start and End pixels for the animation
+                    // Note: You need helper functions to get X/Y from index
+                    const startPos = getCheckerPixels(fromIdx, Math.abs(board.points[fromIdx]) - 1);
+
+
+                    // Remove checker from start
                     newPoints[fromIdx] -= currentPlayer;
 
+                    // Update the logical state for AFTER the animation
                     if (isOpponent && Math.abs(targetCount) === 1) {
-                        newPoints[toIdx] = currentPlayer; // Hit
+                        newPoints[toIdx] = currentPlayer;
+                        // Note: In a real game, you'd move the opponent to the bar here
                     } else {
                         newPoints[toIdx] += currentPlayer;
                     }
 
-                    if (onMoveExecuted) onMoveExecuted(newPoints);
-                    break; // Move only once per click
+                    // Trigger Animation
+                    setAnimatingChecker({
+                        fromX: startPos.x,
+                        fromY: startPos.y,
+                        toX: endPos.x,
+                        toY: endPos.y,
+                        color: currentPlayer,
+                        startTime: performance.now(),
+                        newPoints: newPoints
+                    });
+
+                    break;
+
+
                 }
             }
         }
@@ -444,9 +486,10 @@ const BackgammonBoard: React.FC<Props> = ({
             boardCache.current = cache;
         }
 
-        const animate = () => {
+        const animate = (time: number) => {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
             ctx.drawImage(boardCache.current!, 0, 0);
+            pulseRef.current = (pulseRef.current + 0.05) % (Math.PI * 2);
 
             // --- TURN HIGHLIGHT LOGIC ---
             // Change this logic based on your actual turn variable (e.g., board.currentPlayer)
@@ -511,7 +554,6 @@ const BackgammonBoard: React.FC<Props> = ({
 
             // Checkers
             // 2. Draw Checkers on Points
-            const CHECKER_R = POINT_W * 0.43;
             board.points.forEach((count, i) => {
                 if (count === 0) return;
                 const isTop = i >= 12;
@@ -526,8 +568,27 @@ const BackgammonBoard: React.FC<Props> = ({
                 const spacing = Math.min(CHECKER_R * 2 + 2, (POINT_H - CHECKER_R) / Math.max(1, absCount - 1));
 
                 for (let j = 0; j < absCount; j++) {
+                    // NEW: If this specific checker is currently "flying", don't draw it on the point
+                    const isAnimatingThisPoint = animatingChecker &&
+                        getPointAtCoords(animatingChecker.fromX, animatingChecker.fromY) === i &&
+                        j === absCount - 1;
+
+                    if (isAnimatingThisPoint) continue;
+                    
                     const y = isTop ? MARGIN_V + CHECKER_R + 5 + j * spacing : HEIGHT - MARGIN_V - CHECKER_R - 5 - j * spacing;
                     ctx.save();
+
+                    // --- NEW: Highlight the TOP checker if it belongs to the current player ---
+                    if (j === absCount - 1 && Math.sign(count) === currentPlayer && !isRolling) {
+                        ctx.shadowBlur = 10 + Math.sin(pulseRef.current) * 5;
+                        ctx.shadowColor = currentPlayer === 1 ? '#00ffff' : '#ff00ff';
+                        ctx.strokeStyle = currentPlayer === 1 ? '#00ffff' : '#ff00ff';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(xBase, y, CHECKER_R + 2, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+
                     ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
                     ctx.shadowBlur = 12;
                     ctx.beginPath();
@@ -537,6 +598,39 @@ const BackgammonBoard: React.FC<Props> = ({
                     ctx.restore();
                 }
             });
+
+            if (animatingChecker) {
+                const elapsed = time - animatingChecker.startTime;
+                const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
+
+                // Easing function for smoothness
+                const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+                const currentX = animatingChecker.fromX + (animatingChecker.toX - animatingChecker.fromX) * ease;
+                const currentY = animatingChecker.fromY + (animatingChecker.toY - animatingChecker.fromY) * ease;
+
+                // Add a "Hop" effect (Parabola)
+                const hopHeight = 50;
+                const jumpY = currentY - Math.sin(progress * Math.PI) * hopHeight;
+
+                // Draw the flying checker
+                ctx.save();
+                ctx.shadowBlur = 15;
+                ctx.shadowOffsetY = 10;
+                ctx.shadowColor = "rgba(0,0,0,0.5)";
+                ctx.beginPath();
+                ctx.arc(currentX, jumpY, CHECKER_R * 1.1, 0, Math.PI * 2);
+                ctx.fillStyle = animatingChecker.color < 0 ? '#190802' : '#9B5A3D';
+                ctx.fill();
+                ctx.restore();
+
+                if (progress >= 1) {
+                    // Animation finished!
+                    const finalState = animatingChecker.newPoints;
+                    setAnimatingChecker(null);
+                    if (onMoveExecuted) onMoveExecuted(finalState);
+                }
+            }
 
 
             // 4. Update & Draw 2 DICE
@@ -664,7 +758,7 @@ const BackgammonBoard: React.FC<Props> = ({
         return () => {
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
         };
-    }, [isClient, board, diceValues, isRolling, p1Score, p2Score]);
+    }, [isClient, board, diceValues, isRolling, currentPlayer]);
 
 
     return (
@@ -673,7 +767,7 @@ const BackgammonBoard: React.FC<Props> = ({
                 style={{borderRadius: '12px', overflow: 'hidden'}}
                 className="shadow-2xl border border-[#3e2315] w-full max-w-[1100px] aspect-[11/7] relative">
                 <canvas ref={canvasRef}// Mouse Events
-
+                        onClick={handleCanvasClick}
                         width={WIDTH} height={HEIGHT}
                         className={`w-full h-full block touch-none ${style.gameBoard}`}/>
             </div>

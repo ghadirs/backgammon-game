@@ -49,9 +49,9 @@ const BackgammonBoard: React.FC<Props> = ({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const boardCache = useRef<HTMLCanvasElement | null>(null);
     const requestRef = useRef<number>();
-    const dragRef = useRef<DragState | null>(null);
 
-    const [isDragging, setIsDragging] = useState(false); // Only for forcing re-renders if needed
+    // Pulse animation for state "Available moves"
+    const pulseRef = useRef(0);
     const [isClient, setIsClient] = useState(false);
 
     // --- DIMENSIONS ---
@@ -66,132 +66,79 @@ const BackgammonBoard: React.FC<Props> = ({
     const POINT_W = QUADRANT_WIDTH / 6;
     const POINT_H = HEIGHT * 0.4;
 
-    // --- Drage and Drop
-    const getInternalCoords = (e: React.MouseEvent | React.TouchEvent) => {
+    // --- HELPER: CLICK DETECTION ---
+    const getInternalCoords = (e: React.MouseEvent) => {
         const canvas = canvasRef.current;
         if (!canvas) return {x: 0, y: 0};
-
         const rect = canvas.getBoundingClientRect();
-        let clientX, clientY;
-
-        // Detect if Touch or Mouse
-        if ('touches' in e && e.touches.length > 0) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else {
-            const mouseEvt = e as React.MouseEvent;
-            clientX = mouseEvt.clientX;
-            clientY = mouseEvt.clientY;
-        }
-
-        // Map screen pixels to internal 1100x700 units
         const scaleX = WIDTH / rect.width;
         const scaleY = HEIGHT / rect.height;
-
         return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
         };
     };
-    const getPointAtCoords = (mx: number, my: number) => {
-        // Determine if mouse is in the upper or lower half
-        const isTopHalf = my < HEIGHT / 2;
 
-        // Check horizontal zones
-        const leftQuadrant = mx > SIDEBAR_WIDTH && mx < SIDEBAR_WIDTH + QUADRANT_WIDTH;
-        const rightQuadrant = mx > WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH && mx < WIDTH - SIDEBAR_WIDTH;
+    const getPointAtCoords = (mx: number, my: number) => {
+        const isTopHalf = my < HEIGHT / 2;
+        const leftZone = mx > SIDEBAR_WIDTH && mx < SIDEBAR_WIDTH + QUADRANT_WIDTH;
+        const rightZone = mx > WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH && mx < WIDTH - SIDEBAR_WIDTH;
 
         if (isTopHalf) {
-            if (leftQuadrant) return 12 + Math.floor((mx - SIDEBAR_WIDTH) / POINT_W);
-            if (rightQuadrant) return 18 + Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / POINT_W);
+            if (leftZone) return 12 + Math.floor((mx - SIDEBAR_WIDTH) / POINT_W);
+            if (rightZone) return 18 + Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / POINT_W);
         } else {
-            // Bottom row indices are reversed (0-11)
-            if (rightQuadrant) return 5 - Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / POINT_W);
-            if (leftQuadrant) return 11 - Math.floor((mx - SIDEBAR_WIDTH) / POINT_W);
+            if (rightZone) return 5 - Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / POINT_W);
+            if (leftZone) return 11 - Math.floor((mx - SIDEBAR_WIDTH) / POINT_W);
         }
-
         return -1;
     };
-    // Refactor your existing MouseDown logic into this helper:
-    const handleStartDragging = (x: number, y: number) => {
+
+    // --- CLICK HANDLER ---
+    const handleCanvasClick = (e: React.MouseEvent) => {
+        if (isRolling) return;
+
+        const {x, y} = getInternalCoords(e);
         const pointIdx = getPointAtCoords(x, y);
-        if (pointIdx !== -1 && board.points[pointIdx] !== 0) {
-            dragRef.current = {
-                pointIndex: pointIdx,
-                color: Math.sign(board.points[pointIdx]),
-                startX: x, startY: y,
-                currentX: x, currentY: y
-            };
-            setIsDragging(true);
+
+        // Check if the clicked point has the current player's checkers
+        if (pointIdx !== -1 && Math.sign(board.points[pointIdx]) === currentPlayer) {
+            executeAutoMove(pointIdx);
         }
     };
 
-    const onMouseDown = (e: React.MouseEvent) => {
-        const {x, y} = getInternalCoords(e);
-        handleStartDragging(x, y);
-    };
+    const executeAutoMove = (fromIdx: number) => {
+        // Find a valid move using the dice values in order
+        const moveDir = currentPlayer; // 1 moves forward, -1 moves backward (adjust based on your logic)
 
-    const onMouseMove = (e: React.MouseEvent) => {
-        if (!dragRef.current) return;
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const {x, y} = getInternalCoords(e); // Use the scale-aware helper
-        dragRef.current.currentX = x;
-        dragRef.current.currentY = y;
-    };
+        for (const die of diceValues) {
+            if (die === 0) continue;
 
-    const onTouchStart = (e: React.TouchEvent) => {
-        const {x, y} = getInternalCoords(e);
-        handleStartDragging(x, y);
-    };
+            const toIdx = fromIdx + (die * moveDir);
 
-    const onTouchMove = (e: React.TouchEvent) => {
-        // Prevent the browser from bouncing/scrolling during the game
-        if (e.cancelable) e.preventDefault();
-        const {x, y} = getInternalCoords(e);
-        if (dragRef.current) {
-            dragRef.current.currentX = x;
-            dragRef.current.currentY = y;
-        }
-    };
+            // Check if toIdx is on board
+            if (toIdx >= 0 && toIdx <= 23) {
+                const targetCount = board.points[toIdx];
+                const isOpponent = targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
 
-    const onMouseUp = () => {
-        if (!dragRef.current) return;
+                // Move is valid if target is empty, same color, or a blot (1 opponent)
+                if (!isOpponent || Math.abs(targetCount) === 1) {
+                    const newPoints = [...board.points];
+                    newPoints[fromIdx] -= currentPlayer;
 
-        const {pointIndex: sourceIdx, color, currentX, currentY} = dragRef.current;
-        const targetIdx = getPointAtCoords(currentX, currentY);
+                    if (isOpponent && Math.abs(targetCount) === 1) {
+                        newPoints[toIdx] = currentPlayer; // Hit
+                    } else {
+                        newPoints[toIdx] += currentPlayer;
+                    }
 
-        // 1. Check if we dropped it on a valid triangle
-        if (targetIdx !== -1 && targetIdx !== sourceIdx) {
-            const targetCount = board.points[targetIdx];
-            const targetColor = Math.sign(targetCount);
-
-            // 2. VALIDATION RULES:
-            // Rule A: Target is empty
-            // Rule B: Target has your own color
-            // Rule C: Target has exactly ONE opponent checker (a "blot")
-            const isOpponentColor = targetColor !== 0 && targetColor !== color;
-            const isOccupiedByManyOpponents = isOpponentColor && Math.abs(targetCount) > 1;
-
-            if (!isOccupiedByManyOpponents) {
-                // SUCCESS: Move is valid
-                // Note: In a real app, you'd call an API or use a dispatch here.
-                // For now, we update the local board state:
-                board.points[sourceIdx] -= color;
-
-                if (isOpponentColor && Math.abs(targetCount) === 1) {
-                    // HIT: Opponent checker goes to the bar (logic for bar needed)
-                    board.points[targetIdx] = color;
-                } else {
-                    board.points[targetIdx] += color;
+                    if (onMoveExecuted) onMoveExecuted(newPoints);
+                    break; // Move only once per click
                 }
             }
         }
-
-        // Reset dragging state
-        dragRef.current = null;
-        setIsDragging(false);
     };
+
     // --- DICE PHYSICS STATE ---
     const dicePhysics = useRef<DiePhysics[]>([
         {x: 350, y: 350, vx: 0, vy: 0, angle: 0, vAngle: 0, altitude: 0, vAltitude: 0},
@@ -574,10 +521,7 @@ const BackgammonBoard: React.FC<Props> = ({
                             WIDTH - SIDEBAR_WIDTH - (23 - i + 0.5) * POINT_W;
 
                 let absCount = Math.abs(count);
-                // If we are dragging from this point, hide one checker from the stack
-                if (dragRef.current && dragRef.current.pointIndex === i) {
-                    absCount--;
-                }
+
 
                 const spacing = Math.min(CHECKER_R * 2 + 2, (POINT_H - CHECKER_R) / Math.max(1, absCount - 1));
 
@@ -593,28 +537,6 @@ const BackgammonBoard: React.FC<Props> = ({
                     ctx.restore();
                 }
             });
-
-// 3. DRAW HELD CHECKER (Outside the loop, at the end)
-            if (dragRef.current) {
-                const d = dragRef.current;
-                ctx.save();
-                // Lifted effect
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = 'rgba(0,0,0,0.6)';
-                ctx.shadowOffsetY = 15;
-
-                ctx.beginPath();
-                // Scale slightly larger to look "closer" to the camera
-                ctx.arc(d.currentX, d.currentY, CHECKER_R * 1.05, 0, Math.PI * 2);
-                ctx.fillStyle = d.color < 0 ? '#190802' : '#9B5A3D';
-                ctx.fill();
-
-                // Add a highlight ring
-                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.restore();
-            }
 
 
             // 4. Update & Draw 2 DICE
@@ -751,13 +673,7 @@ const BackgammonBoard: React.FC<Props> = ({
                 style={{borderRadius: '12px', overflow: 'hidden'}}
                 className="shadow-2xl border border-[#3e2315] w-full max-w-[1100px] aspect-[11/7] relative">
                 <canvas ref={canvasRef}// Mouse Events
-                        onMouseDown={onMouseDown}
-                        onMouseMove={onMouseMove}
-                        onMouseUp={onMouseUp}
-                        onMouseLeave={onMouseUp}
-                        onTouchStart={onTouchStart}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={onMouseUp}
+
                         width={WIDTH} height={HEIGHT}
                         className={`w-full h-full block touch-none ${style.gameBoard}`}/>
             </div>

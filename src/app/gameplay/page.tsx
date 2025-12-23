@@ -3,7 +3,7 @@
 import React, {useEffect, useState} from 'react';
 import {CheckCircle2, LogOut, Undo2, Volume2} from 'lucide-react';
 import {BoardState, Player} from '@/types';
-import styles from './Gameplay.module.scss';
+import styles from './gameplay.module.scss';
 import {Toggle} from "@/components/Toggle.tsx";
 import {Button} from "@/components/Button.tsx";
 import {PlayerAvatar} from "@/components/PlayerAvatar.tsx";

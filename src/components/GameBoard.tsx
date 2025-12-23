@@ -42,6 +42,9 @@ const BackgammonBoard: React.FC<Props> = ({
     const boardCache = useRef<HTMLCanvasElement | null>(null);
     const requestRef = useRef<number>();
 
+    // Inside your component
+    const [playableMoves, setPlayableMoves] = useState<number[]>([]);
+
     // Pulse animation for state "Available moves"
     const pulseRef = useRef(0);
     const [isClient, setIsClient] = useState(false);
@@ -127,59 +130,79 @@ const BackgammonBoard: React.FC<Props> = ({
     };
 
     const executeAutoMove = (fromIdx: number) => {
-        // Only allow move if we aren't already animating one
-        if (animatingChecker) return;
+        if (animatingChecker) return; // Prevent double clicks
+        if (playableMoves.length === 0) return; // No moves left
 
         const moveDir = currentPlayer === 1 ? 1 : -1;
+        let chosenMoveIndex = -1;
+        let targetIdx = -1;
 
-        for (const die of diceValues) {
-            if (die === 0) continue;
+        // 1. Find the first valid move from our queue of playable moves
+        for (let i = 0; i < playableMoves.length; i++) {
+            const moveDistance = playableMoves[i];
+            const potentialIdx = fromIdx + (moveDistance * moveDir);
 
-            const toIdx = fromIdx + (die * moveDir);
+            // Check bounds
+            if (potentialIdx >= 0 && potentialIdx <= 23) {
+                const targetCount = board.points[potentialIdx];
 
-            if (toIdx >= 0 && toIdx <= 23) {
-                const targetCount = board.points[toIdx];
-                const isOpponent = targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
+                // Rule: Destination must be empty, yours, or a blot (1 opponent)
+                const isBlocked = Math.sign(targetCount) !== 0 &&
+                    Math.sign(targetCount) !== currentPlayer &&
+                    Math.abs(targetCount) > 1;
 
-                // Basic Backgammon rule: Can move if point is yours, empty, or a blot (1 opponent)
-                if (Math.sign(targetCount) === currentPlayer || Math.abs(targetCount) <= 1) {
-
-                    // 1. Calculate Pixels based on the CURRENT board state
-                    const startStackIdx = Math.abs(board.points[fromIdx]) - 1;
-                    const startPos = getCheckerPixels(fromIdx, startStackIdx);
-
-                    const destStackIdx = isOpponent ? 0 : Math.abs(board.points[toIdx]);
-                    const endPos = getCheckerPixels(toIdx, destStackIdx);
-
-                    // 2. Prepare future state
-                    const newPoints = [...board.points];
-                    newPoints[fromIdx] -= currentPlayer;
-
-                    if (isOpponent && Math.abs(targetCount) === 1) {
-                        newPoints[toIdx] = currentPlayer;
-                        // Note: In a real game, you'd move the opponent to the bar here
-                    } else {
-                        newPoints[toIdx] += currentPlayer;
-                    }
-
-                    // 3. Set Animation State
-                    // This triggers a re-render. The useEffect will pick this up
-                    setAnimatingChecker({
-                        fromX: startPos.x,
-                        fromY: startPos.y,
-                        toX: endPos.x,
-                        toY: endPos.y,
-                        fromIdx: fromIdx,
-                        color: currentPlayer,
-                        startTime: performance.now(),
-                        newPoints: newPoints
-                    });
-
-                    break; // Use only the first valid die found
+                if (!isBlocked) {
+                    chosenMoveIndex = i;
+                    targetIdx = potentialIdx;
+                    break; // We found a valid move, stop looking
                 }
             }
         }
+
+        // 2. If a valid move was found, execute it
+        if (chosenMoveIndex !== -1) {
+            const moveDistance = playableMoves[chosenMoveIndex];
+
+            // --- Calculate Logic (Same as before) ---
+            const startStackIdx = Math.abs(board.points[fromIdx]) - 1;
+            const startPos = getCheckerPixels(fromIdx, startStackIdx);
+
+            const targetCount = board.points[targetIdx];
+            const isOpponent = targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
+            const destStackIdx = isOpponent ? 0 : Math.abs(board.points[targetIdx]);
+            const endPos = getCheckerPixels(targetIdx, destStackIdx);
+
+            // --- Update Board State logic ---
+            const newPoints = [...board.points];
+            newPoints[fromIdx] -= currentPlayer; // Remove from old
+
+            // Handle Hitting logic (Sending opponent to bar? For now we just replace)
+            if (isOpponent) {
+                // In a full game, you'd increment opponent's bar count here
+                newPoints[targetIdx] = currentPlayer;
+            } else {
+                newPoints[targetIdx] += currentPlayer;
+            }
+
+            // --- CRITICAL: Remove the used move from the state ---
+            const newPlayableMoves = [...playableMoves];
+            newPlayableMoves.splice(chosenMoveIndex, 1); // Remove the specific die used
+            setPlayableMoves(newPlayableMoves);
+
+            // --- Trigger Animation ---
+            setAnimatingChecker({
+                fromX: startPos.x,
+                fromY: startPos.y,
+                toX: endPos.x,
+                toY: endPos.y,
+                fromIdx: fromIdx,
+                color: currentPlayer,
+                startTime: performance.now(),
+                newPoints: newPoints
+            });
+        }
     };
+
     // --- DICE PHYSICS STATE ---
     const dicePhysics = useRef<DiePhysics[]>([
         {x: 350, y: 350, vx: 0, vy: 0, angle: 0, vAngle: 0, altitude: 0, vAltitude: 0},
@@ -623,16 +646,20 @@ const BackgammonBoard: React.FC<Props> = ({
                 ctx.fill();
                 ctx.restore();
 
+                // Inside the animate loop, where progress >= 1
                 if (progress >= 1) {
-                    // 1. Capture the target state
                     const finalState = animatingChecker.newPoints;
 
-                    // 2. IMPORTANT: Call the parent callback FIRST
-                    if (onMoveExecuted) {
-                        onMoveExecuted(finalState);
+                    // 1. Inform parent of the board update
+                    if (onMoveExecuted) onMoveExecuted(finalState);
+
+                    // 2. Check if turn is over (all moves used)
+                    // Note: We check if playableMoves length is 0 (it will be 0 after this move finishes)
+                    if (playableMoves.length === 0) {
+                        // Logic to swap players could go here or in the parent
+                        // e.g. onTurnEnd();
                     }
 
-                    // 3. Clear the animation state LAST
                     setAnimatingChecker(null);
                 }
             }
@@ -765,6 +792,24 @@ const BackgammonBoard: React.FC<Props> = ({
         };
     }, [isClient, board, diceValues, isRolling, currentPlayer, animatingChecker]);
 
+    // EFFECT: When dice are rolled, generate the moves list
+    useEffect(() => {
+        if (isRolling) {
+            setPlayableMoves([]); // Clear moves while rolling
+            return;
+        }
+
+        // Wait until dice have values (not 0)
+        if (diceValues.length === 2 && diceValues[0] !== 0) {
+            if (diceValues[0] === diceValues[1]) {
+                // DOUBLES: Player gets 4 moves
+                setPlayableMoves([diceValues[0], diceValues[0], diceValues[0], diceValues[0]]);
+            } else {
+                // STANDARD: Player gets 2 moves
+                setPlayableMoves([...diceValues]);
+            }
+        }
+    }, [diceValues, isRolling]);
 
     return (
         <div className="flex justify-center items-center p-2 sm:p-4 bg-[#1a1a1a] w-full h-full max-h-[90vh]">

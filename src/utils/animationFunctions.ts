@@ -1,5 +1,3 @@
-import {getCheckerPixels} from "@/utils/helpers.ts";
-
 export const executeAutoMove = (fromIdx: number, animatingChecker, playableMoves, currentPlayer, board, setPlayableMoves, setAnimatingChecker, getCheckerPixels) => {
     if (animatingChecker) return; // Prevent double clicks
     if (playableMoves.length === 0) return; // No moves left
@@ -34,14 +32,15 @@ export const executeAutoMove = (fromIdx: number, animatingChecker, playableMoves
     if (chosenMoveIndex !== -1) {
         const moveDistance = playableMoves[chosenMoveIndex];
 
-        // --- Calculate Logic (Same as before) ---
+        // Inside executeAutoMove logic
         const startStackIdx = Math.abs(board.points[fromIdx]) - 1;
-        const startPos = getCheckerPixels(fromIdx, startStackIdx);
+        const startPos = getCheckerPixels(fromIdx, startStackIdx); // Point A
 
         const targetCount = board.points[targetIdx];
         const isOpponent = targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
+        // If hitting, destination is index 0. Otherwise, it's at the top of the stack.
         const destStackIdx = isOpponent ? 0 : Math.abs(board.points[targetIdx]);
-        const endPos = getCheckerPixels(targetIdx, destStackIdx);
+        const endPos = getCheckerPixels(targetIdx, destStackIdx); // Point B
 
         // --- Update Board State logic ---
         const newPoints = [...board.points];

@@ -77,18 +77,18 @@ export const resetDice = (dicePhysics: any, logicalWidth, logicalHeight) => {
     const fromSide = Math.random() > 0.5 ? 1 : 0;
 
     dicePhysics.current.forEach((p, i) => {
-        p.x = fromSide === 1 ? logicalWidth + 100 : -100;
+        p.x = fromSide === 1 ? logicalWidth + 80 : -80;
 
         // Aim for the vertical center (the gutter) to avoid initial checker hits
-        p.y = logicalHeight / 2 + (i === 0 ? -30 : 30);
+        p.y = logicalHeight / 2 + (i === 0 ? -25 : 25);
 
-        const speed = 40 + Math.random() * 10;
+        const speed = 14 + Math.random() * 3;
         p.vx = fromSide === 1 ? -speed : speed;
-        p.vy = (Math.random() - 0.5) * 5; // Low vertical spread
+        p.vy = (Math.random() - 0.5) * 2; // Low vertical spread
 
-        p.altitude = 100;
-        p.vAltitude = 8;
-        p.vAngle = 0.9;
+        p.altitude = 40;
+        p.vAltitude = 6 + Math.random() * 4;
+        p.vAngle = 0.2 + Math.random() * 0.3;
     });
 };
 

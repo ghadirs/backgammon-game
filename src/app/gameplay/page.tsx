@@ -2,12 +2,9 @@
 
 import React, {useEffect, useState} from "react";
 import {CheckCircle2, LogOut, Undo2, Volume2} from "lucide-react";
+import {Button, BackgammonBoard, PlayerAvatar, Toggle} from "@/components"
 import {BoardState, Player} from "@/types";
 import styles from "./gameplay.module.scss";
-import {Toggle} from "@/components/toggle.tsx";
-import {Button} from "@/components/Button.tsx";
-import {PlayerAvatar} from "@/components/playerAvatar.tsx";
-import GameBoard from "@/components/gameBoard.tsx";
 
 const INITIAL_BOARD: BoardState = {
     points: [
@@ -86,7 +83,7 @@ export default function GameplayPage() {
                 {/* CENTER BOARD */}
                 <section className={styles.boardContainer}>
                     <div className={styles.boardOuterFrame}>
-                        <GameBoard
+                        <BackgammonBoard
                             isRolling={isRolling}
                             diceValues={dice}
                             board={board}

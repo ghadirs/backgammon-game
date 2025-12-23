@@ -8,7 +8,7 @@ interface ButtonProps {
     className?: string;
 }
 
-export const Button = ({icon, label, onClick, className}: ButtonProps) => {
+const Button = ({icon, label, onClick, className}: ButtonProps) => {
     return (
         <button className={`${styles.figmaBtn} ${className}`} onClick={onClick}>
             {icon && <span className={styles.icon}>{icon}</span>}
@@ -16,3 +16,5 @@ export const Button = ({icon, label, onClick, className}: ButtonProps) => {
         </button>
     );
 };
+
+export default Button;

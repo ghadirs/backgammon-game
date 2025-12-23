@@ -10,7 +10,7 @@ interface PlayerAvatarProps {
     align?: 'left' | 'right';
 }
 
-export const PlayerAvatar = ({name, balance, flag, image, color, align = 'left'}: PlayerAvatarProps) => {
+const PlayerAvatar = ({name, balance, flag, image, color, align = 'left'}: PlayerAvatarProps) => {
     return (
         <div className={`${styles.container} ${styles[align]}`}>
             <div className={`${styles.hexagonStroke} ${styles[color]}`}>
@@ -31,3 +31,5 @@ export const PlayerAvatar = ({name, balance, flag, image, color, align = 'left'}
         </div>
     );
 };
+
+export default PlayerAvatar;

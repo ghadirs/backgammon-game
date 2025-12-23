@@ -1,17 +1,5 @@
 import React from "react";
 
-export const getCheckerPixels = (i: number, stackIdx: number, logicalHeight, logicalWidth, sidebarWidth, pointWidth, pointHeight, marginV, checkerR) => {
-    const isTop = i >= 12;
-    let xBase = (i < 6) ? logicalWidth - sidebarWidth - (i + 0.5) * pointWidth :
-        (i < 12) ? sidebarWidth + (11 - i + 0.5) * pointWidth :
-            (i < 18) ? sidebarWidth + (i - 12 + 0.5) * pointWidth :
-                logicalWidth - sidebarWidth - (23 - i + 0.5) * pointWidth;
-
-    const spacing = Math.min(checkerR * 2 + 2, (pointHeight - checkerR) / 5);
-    const y = isTop ? marginV + checkerR + 5 + stackIdx * spacing :
-        logicalHeight - marginV - checkerR - 5 - stackIdx * spacing;
-    return {x: xBase, y};
-};
 
 // --- HELPER: CLICK DETECTION ---
 export const getInternalCoords = (e: React.MouseEvent, canvas, logicalWidth, logicalHeight) => {

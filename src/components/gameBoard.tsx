@@ -72,6 +72,25 @@ const BackgammonBoard: React.FC<Props> = ({
     const CHECKER_R = POINT_W * 0.43;
 
 
+    const getCheckerPixels = (i: number, stackIdx: number) => {
+        // Exact same math as your draw loop
+        const isTop = i >= 12;
+        const xBase = (i < 6) ? WIDTH - SIDEBAR_WIDTH - (i + 0.5) * POINT_W :
+            (i < 12) ? SIDEBAR_WIDTH + (11 - i + 0.5) * POINT_W :
+                (i < 18) ? SIDEBAR_WIDTH + (i - 12 + 0.5) * POINT_W :
+                    WIDTH - SIDEBAR_WIDTH - (23 - i + 0.5) * POINT_W;
+
+        // Use a fixed spacing or the dynamic one from your loop
+        const absCountForSpacing = 5; // Use a predictable value for the target or calculate based on board
+        const spacing = Math.min(CHECKER_R * 2 + 2, (POINT_H - CHECKER_R) / Math.max(1, absCountForSpacing));
+
+        const y = isTop
+            ? MARGIN_V + CHECKER_R + 5 + stackIdx * spacing
+            : HEIGHT - MARGIN_V - CHECKER_R - 5 - stackIdx * spacing;
+
+        return {x: xBase, y};
+    };
+
     // --- CLICK HANDLER ---
     const handleCanvasClick = (e: React.MouseEvent) => {
         if (isRolling || animatingChecker) return;
@@ -81,7 +100,7 @@ const BackgammonBoard: React.FC<Props> = ({
 
         // Check if the clicked point has the current player's checkers
         if (pointIdx !== -1 && Math.sign(board.points[pointIdx]) === currentPlayer) {
-            executeAutoMove(pointIdx, animatingChecker, playableMoves, currentPlayer, board, setPlayableMoves, setAnimatingChecker);
+            executeAutoMove(pointIdx, animatingChecker, playableMoves, currentPlayer, board, setPlayableMoves, setAnimatingChecker, getCheckerPixels);
         }
     };
 
@@ -100,6 +119,12 @@ const BackgammonBoard: React.FC<Props> = ({
     useEffect(() => {
         setIsClient(true);
     }, []);
+
+    //Add a ref to track the current board state
+    const boardRef = useRef(board);
+    useEffect(() => {
+        boardRef.current = board;
+    }, [board]);
 
     // --- MAIN ANIMATION LOOP ---
     useEffect(() => {
@@ -201,7 +226,7 @@ const BackgammonBoard: React.FC<Props> = ({
 
             // Checkers
             // 2. Draw Checkers on Points
-            board.points.forEach((count, i) => {
+            boardRef.current.points.forEach((count, i) => {
                 if (count === 0) return;
                 const isTop = i >= 12;
                 let xBase = (i < 6) ? WIDTH - SIDEBAR_WIDTH - (i + 0.5) * POINT_W :
@@ -217,7 +242,7 @@ const BackgammonBoard: React.FC<Props> = ({
                 for (let j = 0; j < absCount; j++) {
                     // NEW: If this specific checker is currently "flying", don't draw it on the point
                     const isAnimatingThisPoint = animatingChecker &&
-                        getPointAtCoords(animatingChecker.fromX, animatingChecker.fromY, WIDTH, HEIGHT, SIDEBAR_WIDTH, QUADRANT_WIDTH, POINT_W) === i &&
+                        animatingChecker.fromIdx === i &&
                         j === absCount - 1;
 
                     if (isAnimatingThisPoint) continue;
@@ -273,19 +298,14 @@ const BackgammonBoard: React.FC<Props> = ({
 
                 // Inside the animate loop, where progress >= 1
                 if (progress >= 1) {
-                    const finalState = animatingChecker.newPoints;
+                    const savedFinalState = animatingChecker.newPoints;
+                    setAnimatingChecker(null); // Clear animation first
 
-                    // 1. Inform parent of the board update
-                    if (onMoveExecuted) onMoveExecuted(finalState);
-
-                    // 2. Check if turn is over (all moves used)
-                    // Note: We check if playableMoves length is 0 (it will be 0 after this move finishes)
-                    if (playableMoves.length === 0) {
-                        // Logic to swap players could go here or in the parent
-                        // e.g. onTurnEnd();
-                    }
-
-                    setAnimatingChecker(null);
+                    // Wrap in a timeout or microtask to ensure the state
+                    // update doesn't interfere with the current frame
+                    setTimeout(() => {
+                        if (onMoveExecuted) onMoveExecuted(savedFinalState);
+                    }, 0);
                 }
             }
 
@@ -421,7 +441,7 @@ const BackgammonBoard: React.FC<Props> = ({
         return () => {
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
         };
-    }, [isClient, board, diceValues, isRolling, currentPlayer, animatingChecker]);
+    }, [isClient, diceValues, isRolling, currentPlayer, animatingChecker]);
 
     // EFFECT: When dice are rolled, generate the moves list
     useEffect(() => {

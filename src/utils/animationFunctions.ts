@@ -1,6 +1,6 @@
 import {getCheckerPixels} from "@/utils/helpers.ts";
 
-export const executeAutoMove = (fromIdx: number, animatingChecker, playableMoves, currentPlayer, board, setPlayableMoves, setAnimatingChecker,) => {
+export const executeAutoMove = (fromIdx: number, animatingChecker, playableMoves, currentPlayer, board, setPlayableMoves, setAnimatingChecker, getCheckerPixels) => {
     if (animatingChecker) return; // Prevent double clicks
     if (playableMoves.length === 0) return; // No moves left
 

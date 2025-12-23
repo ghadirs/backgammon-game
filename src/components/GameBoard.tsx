@@ -787,6 +787,12 @@ const BackgammonBoard: React.FC<Props> = ({
         // START ANIMATION
         requestRef.current = requestAnimationFrame(animate);
 
+        if (!isRolling && !animatingChecker) {// temp
+            console.log("player: ", currentPlayer);
+            console.log("dice: ", diceValues);
+            console.log("board: ", board);
+        }
+
         return () => {
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
         };

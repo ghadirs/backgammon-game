@@ -1,19 +1,14 @@
-export enum Player {
-    White = 1,
-    Black = -1,
-    None = 0
+import {BoardStateType as BoardState} from "@/types/board.ts";
+import {MoveType as Move} from "@/types/board.ts";
+import {PlayerEnum as Player} from "@/types/board.ts"
+import {DiePhysicsType as DiePhysics} from "@/types/board.ts";
+import {PointType as Point} from "@/types/board.ts";
+
+export type {
+    BoardState,
+    Move,
+    DiePhysics,
+    Point
 }
 
-// Interface for a game move, added to fix missing member errors
-export interface Move {
-    from: number;
-    to: number;
-}
-
-export interface BoardState {
-    points: number[]; // Positive for White, Negative for Black
-    whiteBar: number;
-    blackBar: number;
-    whiteOff: number;
-    blackOff: number;
-}
+export {Player}

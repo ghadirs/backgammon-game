@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './PlayerAvatar.module.scss';
+import styles from './playerAvatar.module.scss';
 
 interface PlayerAvatarProps {
     name: string;

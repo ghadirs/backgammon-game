@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {BoardState} from '@/types';
+import {BoardState, DiePhysics} from '@/types';
 import {
     drawCenterBar,
     drawLCDBox,
@@ -8,7 +8,8 @@ import {
     drawSolidCube,
     drawWoodTexture
 } from "../../utils/gameGeometry.ts";
-import {getCheckerPixels, getPointAtCoords} from "../../utils/helpers.ts";
+import {getCheckerPixels, getInternalCoords, getPointAtCoords} from "../../utils/helpers.ts";
+import styles from "./gameBoard.module.scss";
 
 interface Props {
     board: BoardState;
@@ -21,21 +22,6 @@ interface Props {
     onMoveExecuted?: (newPoints: number[]) => void;
 }
 
-interface Point {
-    x: number;
-    y: number;
-}
-
-interface DiePhysics {
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    angle: number;
-    vAngle: number;
-    altitude: number;
-    vAltitude: number;
-}
 
 const BackgammonBoard: React.FC<Props> = ({
                                               board,
@@ -84,12 +70,11 @@ const BackgammonBoard: React.FC<Props> = ({
     const CHECKER_R = POINT_W * 0.43;
 
 
-
     // --- CLICK HANDLER ---
     const handleCanvasClick = (e: React.MouseEvent) => {
         if (isRolling || animatingChecker) return;
 
-        const {x, y} = getInternalCoords(e);
+        const {x, y} = getInternalCoords(e, canvasRef.current);
         const pointIdx = getPointAtCoords(x, y);
 
         // Check if the clicked point has the current player's checkers
@@ -201,14 +186,12 @@ const BackgammonBoard: React.FC<Props> = ({
     }, [isRolling]);
 
 
-
-
     useEffect(() => {
         setIsClient(true);
     }, []);
 
     // --- MAIN ANIMATION LOOP ---
-        useEffect(() => {
+    useEffect(() => {
         if (!isClient) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -509,7 +492,7 @@ const BackgammonBoard: React.FC<Props> = ({
                     }
                     p.angle += p.vAngle;
                 }
-                drawSolidCube(ctx, p, diceValues[i] || 1);
+                drawSolidCube(ctx, p, diceValues[i] || 1, isRolling);
             });
 
             requestRef.current = requestAnimationFrame(animate);
@@ -530,7 +513,7 @@ const BackgammonBoard: React.FC<Props> = ({
     }, [isClient, board, diceValues, isRolling, currentPlayer, animatingChecker]);
 
     // EFFECT: When dice are rolled, generate the moves list
-    useEffect(() =  > {
+    useEffect(() => {
         if (isRolling) {
             setPlayableMoves([]); // Clear moves while rolling
             return;
@@ -556,7 +539,7 @@ const BackgammonBoard: React.FC<Props> = ({
                 <canvas ref={canvasRef}// Mouse Events
                         onClick={handleCanvasClick}
                         width={WIDTH} height={HEIGHT}
-                        className={`w-full h-full block touch-none ${style.gameBoard}`}/>
+                        className={`w-full h-full block touch-none ${styles.gameBoard}`}/>
             </div>
         </div>
     );

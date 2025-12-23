@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './Toggle.module.scss';
+import styles from './toggle.module.scss';
 
 export const Toggle = ({enabled, setEnabled}: { enabled: boolean, setEnabled: (v: boolean) => void }) => {
     return (

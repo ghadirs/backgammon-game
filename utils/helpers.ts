@@ -1,3 +1,16 @@
+// --- DIMENSIONS ---
+const WIDTH = 1100;
+const HEIGHT = 700;
+const SIDEBAR_WIDTH = 80;
+const MARGIN_V = 10;
+const BAR_WIDTH = 60;
+const BAR_H = HEIGHT - MARGIN_V * 2;
+const PLAY_AREA_WIDTH = WIDTH - SIDEBAR_WIDTH * 2 - BAR_WIDTH;
+const QUADRANT_WIDTH = PLAY_AREA_WIDTH / 2;
+const POINT_W = QUADRANT_WIDTH / 6;
+const POINT_H = HEIGHT * 0.4;
+const CHECKER_R = POINT_W * 0.43;
+
 import React from "react";
 
 export const getCheckerPixels = (i: number, stackIdx: number) => {
@@ -14,8 +27,8 @@ export const getCheckerPixels = (i: number, stackIdx: number) => {
 };
 
 // --- HELPER: CLICK DETECTION ---
-export const getInternalCoords = (e: React.MouseEvent) => {
-    const canvas = canvasRef.current;
+export const getInternalCoords = (e: React.MouseEvent, canvas) => {
+
     if (!canvas) return {x: 0, y: 0};
     const rect = canvas.getBoundingClientRect();
     const scaleX = WIDTH / rect.width;

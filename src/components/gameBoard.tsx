@@ -252,13 +252,31 @@ const BackgammonBoard: React.FC<Props> = ({
 
                     // --- NEW: Highlight the TOP checker if it belongs to the current player ---
                     if (j === absCount - 1 && Math.sign(count) === currentPlayer && !isRolling) {
-                        ctx.shadowBlur = 10 + Math.sin(pulseRef.current) * 5;
-                        ctx.shadowColor = currentPlayer === 1 ? '#00ffff' : '#ff00ff';
-                        ctx.strokeStyle = currentPlayer === 1 ? '#00ffff' : '#ff00ff';
-                        ctx.lineWidth = 3;
-                        ctx.beginPath();
-                        ctx.arc(xBase, y, CHECKER_R + 2, 0, Math.PI * 2);
-                        ctx.stroke();
+                        // Inside boardRef.current.points.forEach...
+                        const isMyChecker = Math.sign(count) === currentPlayer;
+                        const isTopChecker = j === absCount - 1;
+                        // 1. Calculate possible target indices based on current dice
+                        const moveDir = currentPlayer === 1 ? 1 : -1;
+                        const canMove = playableMoves.some(die => {
+                            const targetIdx = i + (die * moveDir);
+                            if (targetIdx < 0 || targetIdx > 23) return false;
+
+                            const targetPoint = boardRef.current.points[targetIdx];
+                            // A move is valid if the target is NOT blocked by 2+ opponents
+                            const isBlocked = Math.sign(targetPoint) === -currentPlayer && Math.abs(targetPoint) >= 2;
+
+                            return !isBlocked;
+                        });
+                        // 2. Only highlight if it's yours AND it's not blocked
+                        if (isTopChecker && isMyChecker && !isRolling && canMove) {
+                            ctx.shadowBlur = 10 + Math.sin(pulseRef.current) * 5;
+                            ctx.shadowColor = currentPlayer === 1 ? '#00ffff' : '#ff00ff';
+                            ctx.strokeStyle = currentPlayer === 1 ? '#00ffff' : '#ff00ff';
+                            ctx.lineWidth = 3;
+                            ctx.beginPath();
+                            ctx.arc(xBase, y, CHECKER_R + 2, 0, Math.PI * 2);
+                            ctx.stroke();
+                        }
                     }
 
                     ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
@@ -441,7 +459,7 @@ const BackgammonBoard: React.FC<Props> = ({
         return () => {
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
         };
-    }, [isClient, diceValues, isRolling, currentPlayer, animatingChecker]);
+    }, [isClient, diceValues, isRolling, currentPlayer, animatingChecker, playableMoves]);
 
     // EFFECT: When dice are rolled, generate the moves list
     useEffect(() => {

@@ -22,6 +22,14 @@ export default function GameplayPage() {
     const [currentPlayer, setCurrentPlayer] = useState<number>(1);
     const [hasMounted, setHasMounted] = useState(false);
 
+    const handleMoveExecuted = (newPoints: number[]) => {
+        setBoard(prev => ({
+            ...prev,
+            points: newPoints
+        }));
+        // Optionally decrement the used dice here
+    };
+
     // Fix for Hydration Mismatch
     useEffect(() => {
         setHasMounted(true);
@@ -77,6 +85,7 @@ export default function GameplayPage() {
                             p2Score={51}
                             currentPlayer={currentPlayer}
                             setCurrentPlayer={setCurrentPlayer}
+                            onMoveExecuted={handleMoveExecuted}
                         />
                     </div>
                 </section>

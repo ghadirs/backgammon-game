@@ -115,7 +115,7 @@ const BackgammonBoard: React.FC<Props> = ({
 
     // --- CLICK HANDLER ---
     const handleCanvasClick = (e: React.MouseEvent) => {
-        if (isRolling) return;
+        if (isRolling || animatingChecker) return;
 
         const {x, y} = getInternalCoords(e);
         const pointIdx = getPointAtCoords(x, y);
@@ -143,18 +143,18 @@ const BackgammonBoard: React.FC<Props> = ({
 
                 // Basic Backgammon rule: Can move if point is yours, empty, or a blot (1 opponent)
                 if (Math.sign(targetCount) === currentPlayer || Math.abs(targetCount) <= 1) {
-                    const newPoints = [...board.points];
 
-                    // Calculate Start and End pixels BEFORE we change the array
-                    const startPos = getCheckerPixels(fromIdx, Math.abs(board.points[fromIdx]) - 1);
+                    // 1. Calculate Pixels based on the CURRENT board state
+                    const startStackIdx = Math.abs(board.points[fromIdx]) - 1;
+                    const startPos = getCheckerPixels(fromIdx, startStackIdx);
 
-                    // Calculate destination stack height
-                    // If it's an opponent blot, the new checker will sit at index 0
                     const destStackIdx = isOpponent ? 0 : Math.abs(board.points[toIdx]);
                     const endPos = getCheckerPixels(toIdx, destStackIdx);
 
-                    // Update the logical state for AFTER the animation
+                    // 2. Prepare future state
+                    const newPoints = [...board.points];
                     newPoints[fromIdx] -= currentPlayer;
+
                     if (isOpponent && Math.abs(targetCount) === 1) {
                         newPoints[toIdx] = currentPlayer;
                         // Note: In a real game, you'd move the opponent to the bar here
@@ -162,13 +162,14 @@ const BackgammonBoard: React.FC<Props> = ({
                         newPoints[toIdx] += currentPlayer;
                     }
 
-                    // Trigger Animation
+                    // 3. Set Animation State
+                    // This triggers a re-render. The useEffect will pick this up
                     setAnimatingChecker({
                         fromX: startPos.x,
                         fromY: startPos.y,
                         toX: endPos.x,
                         toY: endPos.y,
-                        fromIdx: fromIdx, // Pass the index here
+                        fromIdx: fromIdx,
                         color: currentPlayer,
                         startTime: performance.now(),
                         newPoints: newPoints
@@ -623,10 +624,16 @@ const BackgammonBoard: React.FC<Props> = ({
                 ctx.restore();
 
                 if (progress >= 1) {
-                    // Animation finished!
+                    // 1. Capture the target state
                     const finalState = animatingChecker.newPoints;
+
+                    // 2. IMPORTANT: Call the parent callback FIRST
+                    if (onMoveExecuted) {
+                        onMoveExecuted(finalState);
+                    }
+
+                    // 3. Clear the animation state LAST
                     setAnimatingChecker(null);
-                    if (onMoveExecuted) onMoveExecuted(finalState);
                 }
             }
 
@@ -756,7 +763,7 @@ const BackgammonBoard: React.FC<Props> = ({
         return () => {
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
         };
-    }, [isClient, board, diceValues, isRolling, currentPlayer]);
+    }, [isClient, board, diceValues, isRolling, currentPlayer, animatingChecker]);
 
 
     return (

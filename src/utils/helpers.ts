@@ -28,19 +28,19 @@ export const getPointAtCoords = (
         mx < WIDTH - SIDEBAR_WIDTH;
 
     if (isTopHalf) {
-        if (leftZone) return 12 + Math.floor((mx - SIDEBAR_WIDTH) / QUADRANT_WIDTH);
+        if (leftZone) return 12 + Math.floor((mx - SIDEBAR_WIDTH) / POINT_W);
         if (rightZone)
             return (
                 18 +
-                Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / QUADRANT_WIDTH)
+                Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / POINT_W)
             );
     } else {
         if (rightZone)
             return (
                 5 -
-                Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / QUADRANT_WIDTH)
+                Math.floor((mx - (WIDTH - SIDEBAR_WIDTH - QUADRANT_WIDTH)) / POINT_W)
             );
-        if (leftZone) return 11 - Math.floor((mx - SIDEBAR_WIDTH) / QUADRANT_WIDTH);
+        if (leftZone) return 11 - Math.floor((mx - SIDEBAR_WIDTH) / POINT_W);
     }
     return -1;
 };

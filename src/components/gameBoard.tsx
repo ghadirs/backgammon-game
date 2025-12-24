@@ -8,7 +8,11 @@ import {
   drawSolidCube,
   drawWoodTexture,
 } from "@/utils/gameGeometry.ts";
-import { getInternalCoords, getPointAtCoords } from "@/utils/helpers.ts";
+import {
+  getCheckerPixels,
+  getInternalCoords,
+  getPointAtCoords,
+} from "@/utils/helpers.ts";
 import styles from "./gameBoard.module.scss";
 import { executeAutoMove, resetDice } from "@/utils/animationFunctions.ts";
 import { useAnimationLoop } from "@/hooks/animationLoopHook.tsx";
@@ -61,32 +65,6 @@ const BackgammonBoard: React.FC<Props> = ({
   const CHECKER_R = POINT_W * 0.43;
   const ANIMATION_DURATION = 300; // ms
 
-  const getCheckerPixels = (i: number, stackIdx: number) => {
-    // Exact same math as your draw loop
-    const isTop = i >= 12;
-    const xBase =
-      i < 6
-        ? WIDTH - SIDEBAR_WIDTH - (i + 0.5) * POINT_W
-        : i < 12
-          ? SIDEBAR_WIDTH + (11 - i + 0.5) * POINT_W
-          : i < 18
-            ? SIDEBAR_WIDTH + (i - 12 + 0.5) * POINT_W
-            : WIDTH - SIDEBAR_WIDTH - (23 - i + 0.5) * POINT_W;
-
-    // Use a fixed spacing or the dynamic one from your loop
-    const absCountForSpacing = 5; // Use a predictable value for the target or calculate based on board
-    const spacing = Math.min(
-      CHECKER_R * 2 + 2,
-      (POINT_H - CHECKER_R) / Math.max(1, absCountForSpacing),
-    );
-
-    const y = isTop
-      ? MARGIN_V + CHECKER_R + 5 + stackIdx * spacing
-      : HEIGHT - MARGIN_V - CHECKER_R - 5 - stackIdx * spacing;
-
-    return { x: xBase, y };
-  };
-
   // --- CLICK HANDLER ---
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (isRolling || animatingChecker) return;
@@ -116,6 +94,13 @@ const BackgammonBoard: React.FC<Props> = ({
         setPlayableMoves,
         setAnimatingChecker,
         getCheckerPixels,
+        WIDTH,
+        HEIGHT,
+        SIDEBAR_WIDTH,
+        POINT_W,
+        POINT_H,
+        CHECKER_R,
+        MARGIN_V,
       );
     }
   };

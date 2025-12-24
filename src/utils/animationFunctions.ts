@@ -7,6 +7,13 @@ export const executeAutoMove = (
   setPlayableMoves,
   setAnimatingChecker,
   getCheckerPixels,
+  logicalWidth: number,
+  logicalHeight: number,
+  sidebarWidth: number,
+  pointWidth: number,
+  pointHeight: number,
+  checkerR: number,
+  marginV: number,
 ) => {
   if (animatingChecker) return; // Prevent double clicks
   if (playableMoves.length === 0) return; // No moves left
@@ -44,14 +51,34 @@ export const executeAutoMove = (
 
     // Inside executeAutoMove logic
     const startStackIdx = Math.abs(board.points[fromIdx]) - 1;
-    const startPos = getCheckerPixels(fromIdx, startStackIdx); // Point A
+    const startPos = getCheckerPixels(
+      fromIdx,
+      startStackIdx,
+      logicalWidth,
+      logicalHeight,
+      sidebarWidth,
+      pointWidth,
+      pointHeight,
+      checkerR,
+      marginV,
+    ); // Point A
 
     const targetCount = board.points[targetIdx];
     const isOpponent =
       targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
     // If hitting, destination is index 0. Otherwise, it's at the top of the stack.
     const destStackIdx = isOpponent ? 0 : Math.abs(board.points[targetIdx]);
-    const endPos = getCheckerPixels(targetIdx, destStackIdx); // Point B
+    const endPos = getCheckerPixels(
+      targetIdx,
+      destStackIdx,
+      logicalWidth,
+      logicalHeight,
+      sidebarWidth,
+      pointWidth,
+      pointHeight,
+      checkerR,
+      marginV,
+    ); // Point B
 
     // --- Update Board State logic ---
     const newPoints = [...board.points];

@@ -1,17 +1,16 @@
 import {DiePhysics, Point} from "@/types"
+import {DIMENSIONS} from "@/variables";
 
-// --- DIMENSIONS ---
-const WIDTH = 1100;
-const HEIGHT = 700;
-const SIDEBAR_WIDTH = 80;
-const MARGIN_V = 10;
-const BAR_WIDTH = 60;
-const BAR_H = HEIGHT - MARGIN_V * 2;
-const PLAY_AREA_WIDTH = WIDTH - SIDEBAR_WIDTH * 2 - BAR_WIDTH;
-const QUADRANT_WIDTH = PLAY_AREA_WIDTH / 2;
-const POINT_W = QUADRANT_WIDTH / 6;
-const POINT_H = HEIGHT * 0.4;
-const CHECKER_R = POINT_W * 0.43;
+const {
+    WIDTH,
+    HEIGHT,
+    SIDEBAR_WIDTH,
+    MARGIN_V,
+    BAR_WIDTH,
+    BAR_H,
+    POINT_W,
+    POINT_H,
+} = DIMENSIONS
 
 // --- RESTORED ORIGINAL DRAWING HELPERS ---
 export const drawWoodTexture = (

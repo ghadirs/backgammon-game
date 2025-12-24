@@ -1,3 +1,5 @@
+import { DIMENSIONS } from "@/variables";
+
 export const executeAutoMove = (
   fromIdx: number,
   animatingChecker,
@@ -7,13 +9,6 @@ export const executeAutoMove = (
   setPlayableMoves,
   setAnimatingChecker,
   getCheckerPixels,
-  logicalWidth: number,
-  logicalHeight: number,
-  sidebarWidth: number,
-  pointWidth: number,
-  pointHeight: number,
-  checkerR: number,
-  marginV: number,
 ) => {
   if (animatingChecker) return; // Prevent double clicks
   if (playableMoves.length === 0) return; // No moves left
@@ -51,34 +46,14 @@ export const executeAutoMove = (
 
     // Inside executeAutoMove logic
     const startStackIdx = Math.abs(board.points[fromIdx]) - 1;
-    const startPos = getCheckerPixels(
-      fromIdx,
-      startStackIdx,
-      logicalWidth,
-      logicalHeight,
-      sidebarWidth,
-      pointWidth,
-      pointHeight,
-      checkerR,
-      marginV,
-    ); // Point A
+    const startPos = getCheckerPixels(fromIdx, startStackIdx); // Point A
 
     const targetCount = board.points[targetIdx];
     const isOpponent =
       targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
     // If hitting, destination is index 0. Otherwise, it's at the top of the stack.
     const destStackIdx = isOpponent ? 0 : Math.abs(board.points[targetIdx]);
-    const endPos = getCheckerPixels(
-      targetIdx,
-      destStackIdx,
-      logicalWidth,
-      logicalHeight,
-      sidebarWidth,
-      pointWidth,
-      pointHeight,
-      checkerR,
-      marginV,
-    ); // Point B
+    const endPos = getCheckerPixels(targetIdx, destStackIdx); // Point B
 
     // --- Update Board State logic ---
     const newPoints = [...board.points];
@@ -111,14 +86,14 @@ export const executeAutoMove = (
   }
 };
 
-export const resetDice = (dicePhysics: any, logicalWidth, logicalHeight) => {
+export const resetDice = (dicePhysics: any) => {
   const fromSide = Math.random() > 0.5 ? 1 : 0;
 
   dicePhysics.current.forEach((p, i) => {
-    p.x = fromSide === 1 ? logicalWidth + 80 : -80;
+    p.x = fromSide === 1 ? DIMENSIONS.WIDTH + 80 : -80;
 
     // Aim for the vertical center (the gutter) to avoid initial checker hits
-    p.y = logicalHeight / 2 + (i === 0 ? -25 : 25);
+    p.y = DIMENSIONS.HEIGHT / 2 + (i === 0 ? -25 : 25);
 
     const speed = 14 + Math.random() * 3;
     p.vx = fromSide === 1 ? -speed : speed;

@@ -1,14 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BoardState, DiePhysics } from "@/types";
 import {
-  drawCenterBar,
-  drawLCDBox,
-  drawPoints,
-  drawSideTray,
-  drawSolidCube,
-  drawWoodTexture,
-} from "@/utils/gameGeometry.ts";
-import {
   getCheckerPixels,
   getInternalCoords,
   getPointAtCoords,
@@ -16,6 +8,7 @@ import {
 import styles from "./gameBoard.module.scss";
 import { executeAutoMove, resetDice } from "@/utils/animationFunctions.ts";
 import { useAnimationLoop } from "@/hooks/animationLoopHook.tsx";
+import { DIMENSIONS } from "@/variables";
 
 interface Props {
   board: BoardState;
@@ -51,33 +44,24 @@ const BackgammonBoard: React.FC<Props> = ({
   // Track the checker currently in flight
   const [animatingChecker, setAnimatingChecker] = useState<null>(null);
 
-  // --- DIMENSIONS ---
-  const WIDTH = 1100;
-  const HEIGHT = 700;
-  const SIDEBAR_WIDTH = 80;
-  const MARGIN_V = 10;
-  const BAR_WIDTH = 60;
-  const BAR_H = HEIGHT - MARGIN_V * 2;
-  const PLAY_AREA_WIDTH = WIDTH - SIDEBAR_WIDTH * 2 - BAR_WIDTH;
-  const QUADRANT_WIDTH = PLAY_AREA_WIDTH / 2;
-  const POINT_W = QUADRANT_WIDTH / 6;
-  const POINT_H = HEIGHT * 0.4;
-  const CHECKER_R = POINT_W * 0.43;
-  const ANIMATION_DURATION = 300; // ms
-
   // --- CLICK HANDLER ---
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (isRolling || animatingChecker) return;
 
-    const { x, y } = getInternalCoords(e, canvasRef.current, WIDTH, HEIGHT);
+    const { x, y } = getInternalCoords(
+      e,
+      canvasRef.current,
+      DIMENSIONS.WIDTH,
+      DIMENSIONS.HEIGHT,
+    );
     const pointIdx = getPointAtCoords(
       x,
       y,
-      WIDTH,
-      HEIGHT,
-      SIDEBAR_WIDTH,
-      QUADRANT_WIDTH,
-      POINT_W,
+      DIMENSIONS.WIDTH,
+      DIMENSIONS.HEIGHT,
+      DIMENSIONS.SIDEBAR_WIDTH,
+      DIMENSIONS.QUADRANT_WIDTH,
+      DIMENSIONS.POINT_W,
     );
 
     // Check if the clicked point has the current player's checkers
@@ -94,13 +78,6 @@ const BackgammonBoard: React.FC<Props> = ({
         setPlayableMoves,
         setAnimatingChecker,
         getCheckerPixels,
-        WIDTH,
-        HEIGHT,
-        SIDEBAR_WIDTH,
-        POINT_W,
-        POINT_H,
-        CHECKER_R,
-        MARGIN_V,
       );
     }
   };
@@ -130,7 +107,7 @@ const BackgammonBoard: React.FC<Props> = ({
   ]);
 
   useEffect(() => {
-    if (isRolling) resetDice(dicePhysics, WIDTH, HEIGHT);
+    if (isRolling) resetDice(dicePhysics, DIMENSIONS.WIDTH, DIMENSIONS.HEIGHT);
   }, [isRolling]);
 
   useEffect(() => {
@@ -196,8 +173,8 @@ const BackgammonBoard: React.FC<Props> = ({
         <canvas
           ref={canvasRef} // Mouse Events
           onClick={handleCanvasClick}
-          width={WIDTH}
-          height={HEIGHT}
+          width={DIMENSIONS.WIDTH}
+          height={DIMENSIONS.HEIGHT}
           className={`w-full h-full block touch-none ${styles.gameBoard}`}
         />
       </div>

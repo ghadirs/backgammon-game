@@ -1,26 +1,39 @@
 import {DIMENSIONS} from "@/variables";
 
+const {WIDTH, HEIGHT, SIDEBAR_WIDTH, POINT_W, POINT_H, CHECKER_R, MARGIN_V} = DIMENSIONS;
+
 export const executeAutoMove = (
     fromIdx: number,
     animatingChecker,
     playableMoves,
     currentPlayer,
     board,
+    boardRef,
     setPlayableMoves,
     setAnimatingChecker,
     getCheckerPixels,
 ) => {
-    if (animatingChecker) return; // Prevent double clicks
-    if (playableMoves.length === 0) return; // No moves left
+    if (animatingChecker || playableMoves.length === 0) return;
 
     const moveDir = currentPlayer === 1 ? 1 : -1;
     let chosenMoveIndex = -1;
     let targetIdx = -1;
+    let isBearingOff = false;
 
     // 1. Find the first valid move from our queue of playable moves
     for (let i = 0; i < playableMoves.length; i++) {
         const moveDistance = playableMoves[i];
         const potentialIdx = fromIdx + moveDistance * moveDir;
+
+        // --- RULE: BEARING OFF (Sidebar) ---
+        // White (1) moves 0 -> 23. Index > 23 is off.
+        // Black (-1) moves 23 -> 0. Index < 0 is off.
+        if ((currentPlayer === 1 && potentialIdx > 23) || (currentPlayer === -1 && potentialIdx < 0)) {
+            // Note: In real rules, all checkers must be in home board to bear off
+            chosenMoveIndex = i;
+            isBearingOff = true;
+            break;
+        }
 
         // Check bounds
         if (potentialIdx >= 0 && potentialIdx <= 23) {
@@ -42,29 +55,53 @@ export const executeAutoMove = (
 
     // 2. If a valid move was found, execute it
     if (chosenMoveIndex !== -1) {
-
-        // Inside executeAutoMove logic
-        const startStackIdx = Math.abs(board.points[fromIdx]) - 1;
-        const startPos = getCheckerPixels(fromIdx, startStackIdx,); // Point A
-
-        const targetCount = board.points[targetIdx];
-        const isOpponent =
-            targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
-        // If hitting, destination is index 0. Otherwise, it's at the top of the stack.
-        const destStackIdx = isOpponent ? 0 : Math.abs(board.points[targetIdx]);
-        const endPos = getCheckerPixels(targetIdx, destStackIdx); // Point B
-
-        // --- Update Board State logic ---
-        const newPoints = [...board.points];
-        newPoints[fromIdx] -= currentPlayer; // Remove from old
-
-        // Handle Hitting logic (Sending opponent to bar? For now we just replace)
-        if (isOpponent) {
-            // In a full game, you'd increment opponent's bar count here
-            newPoints[targetIdx] = currentPlayer;
-        } else {
-            newPoints[targetIdx] += currentPlayer;
+        const moveDistance = playableMoves[chosenMoveIndex];
+        // Calculate targetIdx for non-bearing moves
+        if (!isBearingOff) {
+            targetIdx = fromIdx + moveDistance * moveDir;
         }
+
+        const startStackIdx = Math.abs(board.points[fromIdx]) - 1;
+        const startPos = getCheckerPixels(fromIdx, startStackIdx);
+
+        let endPos;
+        const newPoints = [...board.points];
+        const newBoard = {...board, points: newPoints};
+
+        // --- SUBTRACT ONLY ONCE ---
+        newPoints[fromIdx] -= currentPlayer;
+
+        if (isBearingOff) {
+            // Position inside the side trays
+            endPos = {
+                x: currentPlayer === 1 ? WIDTH - SIDEBAR_WIDTH / 2 : SIDEBAR_WIDTH / 2,
+                y: HEIGHT / 2 + (currentPlayer === 1 ? -100 : 100)
+            };
+            // Update the "Off" counter
+            if (currentPlayer === 1) newBoard.whiteOff++; else newBoard.blackOff++;
+
+        } else {
+            const targetCount = board.points[targetIdx];
+            const isOpponentBlot = targetCount !== 0 && Math.sign(targetCount) !== currentPlayer;
+
+            if (isOpponentBlot) {
+                // HITTING
+                endPos = getCheckerPixels(targetIdx, 0);
+                newPoints[targetIdx] = currentPlayer; // Replace opponent blot with yours
+
+                // Move opponent to bar
+                if (currentPlayer === 1) newBoard.blackBar++; else newBoard.whiteBar++;
+            } else {
+                // NORMAL MOVE
+                const destStackIdx = Math.abs(targetCount);
+                endPos = getCheckerPixels(targetIdx, destStackIdx);
+                newPoints[targetIdx] += currentPlayer;
+            }
+        }
+
+        // CRITICAL: Sync the Ref immediately so the Bar/Tray draws the update
+// while the animation is playing
+        boardRef.current = newBoard;
 
         // --- CRITICAL: Remove the used move from the state ---
         const newPlayableMoves = [...playableMoves];
@@ -81,12 +118,12 @@ export const executeAutoMove = (
             color: currentPlayer,
             startTime: performance.now(),
             newPoints: newPoints,
+            newBoardState: newBoard
         });
     }
 };
 
 export const resetDice = (dicePhysics: any) => {
-    const {WIDTH, HEIGHT} = DIMENSIONS;
     const fromSide = Math.random() > 0.5 ? 1 : 0;
 
     dicePhysics.current.forEach((p, i) => {

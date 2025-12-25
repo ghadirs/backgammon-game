@@ -10,6 +10,8 @@ const {
     BAR_H,
     POINT_W,
     POINT_H,
+    QUADRANT_WIDTH,
+    CHECKER_R
 } = DIMENSIONS
 
 // --- RESTORED ORIGINAL DRAWING HELPERS ---
@@ -343,5 +345,40 @@ export const drawPoints = (ctx: CanvasRenderingContext2D) => {
         ctx.stroke();
 
         ctx.restore();
+    }
+};
+
+// Inside animate loop, after points are drawn
+export const drawBarCheckers = (count: number, playerColor: number, ctx: CanvasRenderingContext2D) => {
+    const absCount = Math.abs(count);
+    const x = SIDEBAR_WIDTH + QUADRANT_WIDTH + (BAR_WIDTH / 2);
+    for (let j = 0; j < absCount; j++) {
+        // Stack them vertically in the center
+        const y = playerColor === 1 ? (HEIGHT / 2) + 40 + (j * 15) : (HEIGHT / 2) - 40 - (j * 15);
+        ctx.beginPath();
+        ctx.arc(x, y, CHECKER_R, 0, Math.PI * 2);
+        ctx.fillStyle = playerColor === 1 ? '#9B5A3D' : '#190802';
+        ctx.fill();
+        ctx.stroke();
+    }
+};
+
+export const drawOffCheckers = (count: number, playerColor: number, ctx: CanvasRenderingContext2D) => {
+    const x = playerColor === 1 ? WIDTH - SIDEBAR_WIDTH / 2 : SIDEBAR_WIDTH / 2;
+    const baseY = playerColor === 1 ? MARGIN_V + 20 : HEIGHT - MARGIN_V - 20;
+    const direction = playerColor === 1 ? 1 : -1;
+
+    for (let i = 0; i < count; i++) {
+        // Draw checkers as flat rectangles or thin discs stacked in the tray
+        const y = baseY + (i * 8 * direction);
+        ctx.fillStyle = playerColor === 1 ? "#9B5A3D" : "#190802";
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 1;
+
+        // Drawing a flattened checker (pill shape) for the tray
+        ctx.beginPath();
+        ctx.roundRect(x - 20, y, 40, 6, 3);
+        ctx.fill();
+        ctx.stroke();
     }
 };

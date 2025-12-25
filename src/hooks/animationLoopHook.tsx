@@ -125,6 +125,23 @@ export const useAnimationLoop = (
       ctx.drawImage(boardCache.current!, 0, 0);
       pulseRef.current = (pulseRef.current + 0.05) % (Math.PI * 2);
 
+      // --- CALCULATE COUNTS FOR DISPLAY ---
+      // We check if a checker is currently flying to the Bear-Off tray
+      const animatingToWhiteOff =
+        animatingChecker &&
+        animatingChecker.isBearingOff &&
+        animatingChecker.color === 1;
+      const animatingToBlackOff =
+        animatingChecker &&
+        animatingChecker.isBearingOff &&
+        animatingChecker.color === -1;
+
+      // Calculate display counts (State count minus 1 if it's currently flying there)
+      const whiteOffCount =
+        boardRef.current.whiteOff - (animatingToWhiteOff ? 1 : 0);
+      const blackOffCount =
+        boardRef.current.blackOff - (animatingToBlackOff ? 1 : 0);
+
       // --- DRAW DYNAMIC BAR CHECKERS ---
       // Use boardRef to ensure we have the most recent hit/off counts
       drawBarCheckers(boardRef.current.whiteBar, 1, ctx);
@@ -170,7 +187,11 @@ export const useAnimationLoop = (
       ctx.fillStyle = "#cca";
       ctx.font = "bold 16px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("1", SIDEBAR_WIDTH / 2, HEIGHT / 2 + 5);
+      ctx.fillText(
+        currentPlayer === 1 ? "You" : "Him",
+        SIDEBAR_WIDTH / 2,
+        HEIGHT / 2 + 5,
+      );
 
       drawLCDBox(
         ctx,
@@ -181,9 +202,6 @@ export const useAnimationLoop = (
         p2Score.toString(),
         "#b25e34",
       );
-
-      drawBarCheckers(boardRef.current.whiteBar, 1, ctx);
-      drawBarCheckers(boardRef.current.blackBar, -1, ctx);
 
       ctx.save();
       // 1. Calculate the pulse value FIRST (oscillates opacity between 0.1 and 0.4)
@@ -234,6 +252,23 @@ export const useAnimationLoop = (
       // 2. Draw Checkers on Points
       boardRef.current.points.forEach((count, i) => {
         if (count === 0) return;
+
+        let absCount = Math.abs(count);
+
+        // --- CRITICAL FIX: Hide Destination Checker ---
+        // If this point is the destination of the flying checker,
+        // draw one less checker (it hasn't landed yet!)
+        if (
+          animatingChecker &&
+          !animatingChecker.isBearingOff &&
+          animatingChecker.toIdx === i
+        ) {
+          absCount = Math.max(0, absCount - 1);
+        }
+
+        if (absCount === 0) return;
+
+        // Position Logic
         const isTop = i >= 12;
         let xBase =
           i < 6
@@ -243,8 +278,6 @@ export const useAnimationLoop = (
               : i < 18
                 ? SIDEBAR_WIDTH + (i - 12 + 0.5) * POINT_W
                 : WIDTH - SIDEBAR_WIDTH - (23 - i + 0.5) * POINT_W;
-
-        let absCount = Math.abs(count);
 
         const spacing = Math.min(
           CHECKER_R * 2 + 2,

@@ -4,32 +4,6 @@ $gold-gradient: linear-gradient(180deg, #d4af37 0%, #aa8a2e 100%);
 $panel-bg: rgba(28, 31, 46, 0.8); // Dark bluish-gray from the side panels
 $btn-action: #2a2d3e;
 
-.mainWrapper {
-  height: 100vh;
-  width: 100vw;
-  // REPLACED: Using the blurred background image from your design
-  background: url('/background.png') no-repeat center center;
-  background-size: cover;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  color: white;
-  position: relative;
-
-  // Optional: Add a dark overlay if the image is too bright compared to Figma
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(10, 14, 20, 0.4); // Subtle darkening
-    z-index: 0;
-  }
-}
-
 .gameGrid {
   display: grid;
   grid-template-columns: 240px 1fr 240px;
@@ -164,7 +138,7 @@ $btn-action: #2a2d3e;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px #6E78B3;
+      border: 2px #6e78b3;
 
       &.player1 {
         background: #ff4d4d;
@@ -210,7 +184,7 @@ $btn-action: #2a2d3e;
     align-items: center;
 
     .title {
-      font-family: 'Serif', serif;
+      font-family: "Serif", serif;
       font-size: 3.5rem;
       font-weight: 900;
       color: $gold-primary;
@@ -235,7 +209,8 @@ $btn-action: #2a2d3e;
     width: 100%;
 
     /* Action buttons (Undo, Done, Sound, Exit) */
-    .actionBtn, .footerBtn {
+    .actionBtn,
+    .footerBtn {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -298,7 +273,8 @@ $btn-action: #2a2d3e;
   }
 
   // Footer Buttons (Exit/Sound)
-  .footerActions, .actionColumn {
+  .footerActions,
+  .actionColumn {
     display: flex;
     flex-direction: column;
     gap: 10px;

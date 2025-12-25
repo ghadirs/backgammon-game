@@ -70,3 +70,34 @@ export const getCheckerPixels = (i: number, stackIdx: number) => {
 
     return {x: xBase, y};
 };
+
+// --- NEW HELPER: Single Source of Truth for Bear Off Positions ---
+export const getBearOffPos = (player: number, stackIndex: number) => {
+    // X is center of Right Sidebar
+    const x = WIDTH - SIDEBAR_WIDTH / 2;
+
+    // Player 1 (White/Positive): Bottom Right Tray
+    // Player 2 (Black/Negative): Top Right Tray
+    // (Adjust this Top/Bottom logic to match your specific board preference)
+    const isPlayer1 = player === 1;
+
+    // Base Y position for the "First" checker in the stack
+    // Player 2 starts at top (MARGIN_V + 40)
+    // Player 1 starts at bottom (HEIGHT - MARGIN_V - 40)
+    const baseY = isPlayer1
+        ? HEIGHT - MARGIN_V - 40
+        : MARGIN_V + 40;
+
+    // Direction to stack: Player 1 stacks UP (-1), Player 2 stacks DOWN (+1)
+    const direction = isPlayer1 ? -1 : 1;
+
+    // The gap between checkers in the tray (flattened look)
+    const stackGap = 10;
+
+    return {
+        x: x,
+        y: baseY + (stackIndex * stackGap * direction)
+    };
+};
+
+

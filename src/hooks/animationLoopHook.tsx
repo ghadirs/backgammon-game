@@ -167,18 +167,21 @@ export const useAnimationLoop = (
             // But we use gameStateRef.current for UI/Logic flags
 
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
-            ctx.drawImage(boardCache.current!, 0, 0);
-            pulseRef.current = (pulseRef.current + 0.05) % (Math.PI * 2);
 
-            // --- CALCULATE OFF COUNTS ---
+            // --- LAYER 1: STATIC BOARD CACHE ---
+            // (Includes Wood texture, Points, and empty Side Trays if baked in)
+            ctx.drawImage(boardCache.current!, 0, 0);
+            // pulseRef.current = (pulseRef.current + 0.05) % (Math.PI * 2);
+
+            // --- LAYER 2: TRAY & BAR CHECKERS ---
+            // Calculate counts for display (subtracting 1 if currently animating TO this spot)
             const animatingToWhiteOff = animatingChecker && animatingChecker.isBearingOff && animatingChecker.color === 1;
             const animatingToBlackOff = animatingChecker && animatingChecker.isBearingOff && animatingChecker.color === -1;
 
             const whiteOffCount = boardRef.current.whiteOff - (animatingToWhiteOff ? 1 : 0);
             const blackOffCount = boardRef.current.blackOff - (animatingToBlackOff ? 1 : 0);
 
-
-            // --- DRAW CHECKERS (Bar & Off) ---
+            // Draw these NOW, so they sit ON TOP of the board cache
             drawBarCheckers(boardRef.current.whiteBar, 1, ctx);
             drawBarCheckers(boardRef.current.blackBar, -1, ctx);
 

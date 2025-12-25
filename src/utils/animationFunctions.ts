@@ -1,4 +1,5 @@
 import {DIMENSIONS} from "@/variables";
+import {getBearOffPos} from "@/utils/helpers.ts";
 
 const {WIDTH, HEIGHT, SIDEBAR_WIDTH, POINT_W, POINT_H, CHECKER_R, MARGIN_V} = DIMENSIONS;
 
@@ -72,13 +73,16 @@ export const executeAutoMove = (
         newPoints[fromIdx] -= currentPlayer;
 
         if (isBearingOff) {
-            // Position inside the side trays
-            endPos = {
-                x: currentPlayer === 1 ? WIDTH - SIDEBAR_WIDTH / 2 : SIDEBAR_WIDTH / 2,
-                y: HEIGHT / 2 + (currentPlayer === 1 ? -100 : 100)
-            };
-            // Update the "Off" counter
-            if (currentPlayer === 1) newBoard.whiteOff++; else newBoard.blackOff++;
+            // --- FIX: Use Shared Geometry Helper ---
+            const currentOffCount = currentPlayer === 1 ? board.whiteOff : board.blackOff;
+
+            // We pass 'currentOffCount' as the index, which puts it at the TOP of the stack
+            const pos = getBearOffPos(currentPlayer, currentOffCount);
+
+            endPos = {x: pos.x, y: pos.y};
+
+            if (currentPlayer === 1) newBoard.whiteOff++;
+            else newBoard.blackOff++;
 
         } else {
             const targetCount = board.points[targetIdx];

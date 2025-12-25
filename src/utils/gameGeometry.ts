@@ -1,5 +1,6 @@
 import {DiePhysics, Point} from "@/types"
 import {DIMENSIONS} from "@/variables";
+import {getBearOffPos} from "@/utils/helpers.ts";
 
 const {
     WIDTH,
@@ -364,21 +365,48 @@ export const drawBarCheckers = (count: number, playerColor: number, ctx: CanvasR
 };
 
 export const drawOffCheckers = (count: number, playerColor: number, ctx: CanvasRenderingContext2D) => {
-    const x = playerColor === 1 ? WIDTH - SIDEBAR_WIDTH / 2 : SIDEBAR_WIDTH / 2;
-    const baseY = playerColor === 1 ? MARGIN_V + 20 : HEIGHT - MARGIN_V - 20;
-    const direction = playerColor === 1 ? 1 : -1;
+    // 1. Draw the "Tray Hole" Background (Always drawn, even if count is 0)
+    const trayY = playerColor === 1 ? HEIGHT - MARGIN_V - 100 : MARGIN_V + 20;
 
+    ctx.save();
+    ctx.fillStyle = "#2a150b"; // Dark recessed wood
+    ctx.shadowColor = "rgba(255,255,255,0.1)";
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetY = 1;
+
+    ctx.beginPath();
+    // Draw the tray hole centered on the sidebar
+    ctx.roundRect(WIDTH - SIDEBAR_WIDTH / 2 - 22, trayY, 44, 130, 22);
+    ctx.fill();
+
+    // Inner stroke
+    ctx.shadowColor = "transparent";
+    ctx.strokeStyle = "#1a0d06";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    if (!count || count <= 0) return;
+
+    // 2. Draw the Checkers using the shared helper
     for (let i = 0; i < count; i++) {
-        // Draw checkers as flat rectangles or thin discs stacked in the tray
-        const y = baseY + (i * 8 * direction);
-        ctx.fillStyle = playerColor === 1 ? "#9B5A3D" : "#190802";
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 1;
+        const pos = getBearOffPos(playerColor, i);
 
-        // Drawing a flattened checker (pill shape) for the tray
         ctx.beginPath();
-        ctx.roundRect(x - 20, y, 40, 6, 3);
+        // Flattened ellipse for 3D look in the tray
+        ctx.ellipse(pos.x, pos.y, 18, 6, 0, 0, Math.PI * 2);
+
+        ctx.fillStyle = playerColor === 1 ? '#9B5A3D' : '#190802';
         ctx.fill();
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#000";
         ctx.stroke();
+
+        // Shine
+        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        ctx.beginPath();
+        ctx.ellipse(pos.x, pos.y - 1, 14, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
     }
 };

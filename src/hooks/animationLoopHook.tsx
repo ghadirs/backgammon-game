@@ -152,7 +152,6 @@ export const useAnimationLoop = (
         }
 
         const animate = (time: number) => {
-            // ACCESS LATEST STATE
             const {
                 animatingChecker,
                 currentPlayer,
@@ -163,141 +162,69 @@ export const useAnimationLoop = (
                 p2Score
             } = gameStateRef.current;
 
-            // Note: We use boardRef.current for check positions as it's mutable and instant
-            // But we use gameStateRef.current for UI/Logic flags
-
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-            // --- LAYER 1: STATIC BOARD CACHE ---
-            // (Includes Wood texture, Points, and empty Side Trays if baked in)
+            // --- LAYER 1: BACKGROUND ---
             ctx.drawImage(boardCache.current!, 0, 0);
-            // pulseRef.current = (pulseRef.current + 0.05) % (Math.PI * 2);
 
-            // --- LAYER 2: TRAY & BAR CHECKERS ---
-            // Calculate counts for display (subtracting 1 if currently animating TO this spot)
-            const animatingToWhiteOff = animatingChecker && animatingChecker.isBearingOff && animatingChecker.color === 1;
-            const animatingToBlackOff = animatingChecker && animatingChecker.isBearingOff && animatingChecker.color === -1;
+            // --- LAYER 2: TRAY & BAR (STATIONARY) ---
+            // Logic: If a checker is flying TO the bar or TO the off-tray, hide one from the total count
+            const animatingToWhiteOff = animatingChecker?.isBearingOff && animatingChecker.color === 1;
+            const animatingToBlackOff = animatingChecker?.isBearingOff && animatingChecker.color === -1;
 
-            const whiteOffCount = boardRef.current.whiteOff - (animatingToWhiteOff ? 1 : 0);
-            const blackOffCount = boardRef.current.blackOff - (animatingToBlackOff ? 1 : 0);
+            // We also need to account for HITS (flying to a point but sending opponent to bar)
+            // If the flying checker ISN'T bearing off, but it's landing on an opponent blot...
+            // The bar count increases immediately in state, so we hide it until landing.
+            const isHit = animatingChecker && !animatingChecker.isBearingOff &&
+                Math.sign(boardRef.current.points[animatingChecker.toIdx]) === animatingChecker.color &&
+                Math.abs(boardRef.current.points[animatingChecker.toIdx]) === 1 &&
+                board.points[animatingChecker.toIdx] === -animatingChecker.color; // Board before move had opponent
 
-            // Draw these NOW, so they sit ON TOP of the board cache
-            drawBarCheckers(boardRef.current.whiteBar, 1, ctx);
-            drawBarCheckers(boardRef.current.blackBar, -1, ctx);
+            const whiteBarCount = boardRef.current.whiteBar - (isHit && animatingChecker?.color === -1 ? 1 : 0);
+            const blackBarCount = boardRef.current.blackBar - (isHit && animatingChecker?.color === 1 ? 1 : 0);
 
-            drawOffCheckers(whiteOffCount, 1, ctx);
-            drawOffCheckers(blackOffCount, -1, ctx);
+            drawBarCheckers(whiteBarCount, 1, ctx);
+            drawBarCheckers(blackBarCount, -1, ctx);
+            drawOffCheckers(boardRef.current.whiteOff - (animatingToWhiteOff ? 1 : 0), 1, ctx);
+            drawOffCheckers(boardRef.current.blackOff - (animatingToBlackOff ? 1 : 0), -1, ctx);
 
-            // --- TURN HIGHLIGHT LOGIC ---
-            // Change this logic based on your actual turn variable (e.g., board.currentPlayer)
-            const isBottomTurn = currentPlayer === 1;
+            // --- LAYER 3: UI & TURN HIGHLIGHT ---
+            drawLCDBox(ctx, 15, HEIGHT / 2 - 60, SIDEBAR_WIDTH - 30, 30, p1Score.toString(), "#b25e34");
+            drawLCDBox(ctx, 15, HEIGHT / 2 + 30, SIDEBAR_WIDTH - 30, 30, p2Score.toString(), "#b25e34");
 
-            // 3. DRAW DYNAMIC STUFF
-            drawLCDBox(
-                ctx,
-                15,
-                HEIGHT / 2 - 60,
-                SIDEBAR_WIDTH - 30,
-                30,
-                p1Score.toString(),
-                "#b25e34",
-            );
-
-            // Score Circle
+            // Player indicator circle
             ctx.beginPath();
             ctx.arc(SIDEBAR_WIDTH / 2, HEIGHT / 2, 20, 0, Math.PI * 2);
-            const btnGrad = ctx.createRadialGradient(
-                SIDEBAR_WIDTH / 2,
-                HEIGHT / 2,
-                5,
-                SIDEBAR_WIDTH / 2,
-                HEIGHT / 2,
-                20,
-            );
-            btnGrad.addColorStop(0, "#800000");
-            btnGrad.addColorStop(1, "#400000");
-            ctx.fillStyle = btnGrad;
+            ctx.fillStyle = "#400000";
             ctx.fill();
-            ctx.strokeStyle = "#cca";
-            ctx.lineWidth = 2;
-            ctx.stroke();
             ctx.fillStyle = "#cca";
-            ctx.font = "bold 16px Arial";
             ctx.textAlign = "center";
-            ctx.fillText("1", SIDEBAR_WIDTH / 2, HEIGHT / 2 + 5);
+            ctx.fillText(currentPlayer === 1 ? "1" : "2", SIDEBAR_WIDTH / 2, HEIGHT / 2 + 5);
 
-            drawLCDBox(
-                ctx,
-                15,
-                HEIGHT / 2 + 30,
-                SIDEBAR_WIDTH - 30,
-                30,
-                p2Score.toString(),
-                "#b25e34",
-            );
-
-            drawBarCheckers(boardRef.current.whiteBar, 1, ctx);
-            drawBarCheckers(boardRef.current.blackBar, -1, ctx);
-
+            // Turn Glow
             ctx.save();
-            // 1. Calculate the pulse value FIRST (oscillates opacity between 0.1 and 0.4)
-            const pulse = 0.4 + Math.sin(Date.now() / 500) * 0.15; // Oscillates between 0.05 and 0.15
-            const glowHeight = HEIGHT * 0.45; // Glow covers roughly half the board height
-            const highlightGrad = ctx.createLinearGradient(
-                0,
-                isBottomTurn ? HEIGHT : 0,
-                0,
-                isBottomTurn ? HEIGHT - glowHeight : glowHeight,
-            );
-
-            // 2. Create the gradient
-            highlightGrad.addColorStop(0, "rgba(0, 150, 255, 0.75)");
-            highlightGrad.addColorStop(1, "rgba(0, 150, 255, 0)");
-
-            // 3. Apply the dynamic pulse to the gradient stops
+            const pulse = 0.4 + Math.sin(Date.now() / 500) * 0.15;
+            const isBottomTurn = currentPlayer === 1;
+            const highlightGrad = ctx.createLinearGradient(0, isBottomTurn ? HEIGHT : 0, 0, isBottomTurn ? HEIGHT - (HEIGHT * 0.45) : (HEIGHT * 0.45));
             highlightGrad.addColorStop(0, `rgba(0, 150, 255, ${pulse})`);
-
-            // 4. Fill the rectangle
+            highlightGrad.addColorStop(1, "rgba(0, 150, 255, 0)");
             ctx.fillStyle = highlightGrad;
-            if (isBottomTurn) {
-                ctx.fillRect(
-                    SIDEBAR_WIDTH,
-                    HEIGHT - glowHeight,
-                    PLAY_AREA_WIDTH + BAR_WIDTH,
-                    glowHeight,
-                );
-            } else {
-                ctx.fillRect(SIDEBAR_WIDTH, 0, PLAY_AREA_WIDTH + BAR_WIDTH, glowHeight);
-            }
+            ctx.fillRect(SIDEBAR_WIDTH, isBottomTurn ? HEIGHT - (HEIGHT * 0.45) : 0, PLAY_AREA_WIDTH + BAR_WIDTH, HEIGHT * 0.45);
             ctx.restore();
 
-            // 5. Draw the glowing edge line (also pulsing!)
-            ctx.strokeStyle = "rgba(0, 180, 255, 0.4)";
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            if (isBottomTurn) {
-                ctx.moveTo(SIDEBAR_WIDTH, HEIGHT - 2);
-                ctx.lineTo(WIDTH - SIDEBAR_WIDTH, HEIGHT - 2);
-            } else {
-                ctx.moveTo(SIDEBAR_WIDTH, 2);
-                ctx.lineTo(WIDTH - SIDEBAR_WIDTH, 2);
-            }
-            ctx.stroke();
-
-            // Checkers
-            // 2. Draw Checkers on Points
+            // --- LAYER 4: STATIC POINT CHECKERS ---
             boardRef.current.points.forEach((count, i) => {
                 if (count === 0) return;
                 let absCount = Math.abs(count);
 
-                // --- DESTINATION HIDE FIX ---
-                // Hide the "landing spot" checker while animation is happening
+                // CRITICAL FIX: If this point is the destination, we hide the "new" checker
                 if (animatingChecker && !animatingChecker.isBearingOff && animatingChecker.toIdx === i) {
-                    absCount = Math.max(0, absCount - 1);
+                    absCount--;
                 }
 
-                if (absCount === 0) return;
+                if (absCount <= 0) return;
 
+                // Position Logic
                 const isTop = i >= 12;
                 let xBase = i < 6 ? WIDTH - SIDEBAR_WIDTH - (i + 0.5) * POINT_W :
                     i < 12 ? SIDEBAR_WIDTH + (11 - i + 0.5) * POINT_W :
@@ -347,6 +274,7 @@ export const useAnimationLoop = (
             });
 
 
+// --- LAYER 5: THE FLYING CHECKER ---
             if (animatingChecker) {
                 const elapsed = time - animatingChecker.startTime;
                 const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
@@ -354,12 +282,10 @@ export const useAnimationLoop = (
 
                 const currentX = animatingChecker.fromX + (animatingChecker.toX - animatingChecker.fromX) * ease;
                 const currentY = animatingChecker.fromY + (animatingChecker.toY - animatingChecker.fromY) * ease;
-                const hopHeight = 50;
-                const jumpY = currentY - Math.sin(progress * Math.PI) * hopHeight;
+                const jumpY = currentY - Math.sin(progress * Math.PI) * 50; // Hop
 
                 ctx.save();
                 ctx.shadowBlur = 15;
-                ctx.shadowOffsetY = 10;
                 ctx.shadowColor = "rgba(0,0,0,0.5)";
                 ctx.beginPath();
                 ctx.arc(currentX, jumpY, CHECKER_R * 1.1, 0, Math.PI * 2);
@@ -368,17 +294,13 @@ export const useAnimationLoop = (
                 ctx.restore();
 
                 if (progress >= 1) {
-                    // Animation Complete
                     boardRef.current = animatingChecker.newBoardState;
                     const finalPoints = animatingChecker.newPoints;
                     setAnimatingChecker(null);
-
-                    queueMicrotask(() => {
-                        if (onMoveExecuted) onMoveExecuted(finalPoints);
-                    });
+                    if (onMoveExecuted) onMoveExecuted(finalPoints);
                 }
             }
-
+            
             // 4. Update & Draw 2 DICE
             dicePhysics.current.slice(0, 2).forEach((p, i) => {
                 const dieValue = diceValues[i];

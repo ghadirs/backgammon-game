@@ -1,12 +1,15 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-    content: [
-        "./src/app/**/*.{js,ts,jsx,tsx,mdx}",      // Your page/lobby file
-        "./src/components/**/*.{js,ts,jsx,tsx,mdx}", // Your GameCard/NavItem files
-        "./src/**/*.{js,ts,jsx,tsx,mdx}",      // Include if you have a src folder
-    ],
-    theme: {
-        extend: {},
-    },
-    plugins: [],
-}
+/**
+ * PostCSS Configuration
+ *
+ * Tailwind CSS v4 (via @tailwindcss/vite) automatically sets up all required
+ * PostCSS plugins — you do NOT need to include `tailwindcss` or `autoprefixer` here.
+ *
+ * This file only exists for adding additional PostCSS plugins, if needed.
+ * For example:
+ *
+ * import postcssNested from 'postcss-nested'
+ * export default { plugins: [postcssNested()] }
+ *
+ * Otherwise, you can leave this file empty.
+ */
+export default {}

@@ -1,4 +1,4 @@
-import ButtonComponent from "./button";
+import ButtonComponent from "./ui/Button.tsx";
 import BackgammonBoardComponent from "./gameBoard";
 import PlayerAvatarComponent from "./playerAvatar";
 import ToggleSwitchComponent from "./toggle";

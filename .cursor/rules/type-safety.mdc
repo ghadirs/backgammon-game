@@ -1,0 +1,12 @@
+---
+description: Standards for error prevention without using heavy test suites.
+alwaysApply: true
+---
+
+# Zero-Test Quality Control
+
+Since we are not using a testing suite, quality must be enforced via the compiler:
+
+1. **Strict Types:** Every prop converted from Figma must have a defined Interface.
+2. **Discriminated Unions:** Use them for component states (e.g., `status: 'loading' | 'success' | 'error'`) to prevent impossible UI states.
+3. **Zod Validation:** If fetching data, use Zod to validate the schema at runtime. This replaces the need for "integration tests."

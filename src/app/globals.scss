@@ -1,8 +1,10 @@
+@reference "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -10,6 +12,7 @@ html, body {
 }
 
 /* Ensure the Next.js root div also fills the height */
-#__next, [data-nextjs-scroll-focus-boundary] {
+#__next,
+[data-nextjs-scroll-focus-boundary] {
   height: 100%;
 }

@@ -1,0 +1,14 @@
+---
+description: Rules for eco-friendly and performant UI generation
+globs: **/*.{tsx,jsx,html,css}
+---
+# Sustainable UI Standards
+
+## 🌿 Energy Efficiency
+- **CSS over JS:** Use native CSS (Grid/Flexbox) for layouts. Avoid JS-heavy animation libraries for simple transitions.
+- **DOM Depth:** Keep the DOM tree shallow. Avoid "div soup" by using semantic HTML (`<main>`, `<article>`, `<section>`).
+- **Assets:** Always use `loading="lazy"` for images and prioritize SVGs over PNGs.
+
+## 🎨 Figma Translation
+- **Design Tokens:** Map Figma hex codes to existing CSS variables (e.g., `var(--primary)`) rather than hardcoding.
+- **Responsive:** Build mobile-first. Use Tailwind's `sm:`, `md:`, `lg:` prefixes based on Figma breakpoints.

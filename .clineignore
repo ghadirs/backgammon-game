@@ -1,0 +1,49 @@
+# --- EXTREMELY IMPORTANT: BLOCK LARGE ARTIFACTS ---
+node_modules/
+bower_components/
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+
+# --- MEDIA & BINARIES (Massive token waste) ---
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.pdf
+*.zip
+*.tar.gz
+*.mp4
+*.woff
+*.woff2
+
+# --- LOCK FILES (Cline doesn't need to read these to code) ---
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# --- LOGS & TEMP FILES ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env*
+.DS_Store
+.eslintcache
+
+# --- TESTING & COVERAGE ---
+coverage/
+.nyc_output/
+*.lcov
+
+# --- DATABASE / LOCAL STORAGE ---
+*.sqlite
+*.db
+.vercel/
+.turbo/

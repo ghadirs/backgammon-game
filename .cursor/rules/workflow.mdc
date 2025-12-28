@@ -1,0 +1,18 @@
+---
+description: Project structure and Git conventions
+alwaysApply: true
+---
+
+# Workflow & Organization
+
+## 📂 Folder Structure
+
+- `/src/components/ui`: Atomic, reusable UI components.
+- `/src/components/features`: Feature-specific logic.
+- `/src/hooks`: All side-effects and state logic.
+- `/src/lib`: Third-party configurations (Supabase, Firebase, etc.).
+
+## 📝 Git Strategy
+
+- Use **Conventional Commits**: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`.
+- Keep commit messages under 60 characters.

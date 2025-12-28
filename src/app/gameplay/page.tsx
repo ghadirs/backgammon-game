@@ -57,13 +57,13 @@ export default function GameplayPage() {
         clearInterval(interval);
         setIsRolling(false);
         setCurrentPlayer((prev) =>
-          prev === Player.White ? Player.Black : Player.White,
+          prev === Player.White ? Player.Black : Player.White
         );
       }
     }, 60);
   };
 
-  if (!hasMounted) return <div className="min-h-screen bg-[#111]" />;
+  if (!hasMounted) return <div className='min-h-screen bg-[#111]' />;
 
   return (
     <BasicLayout className={""}>
@@ -71,18 +71,18 @@ export default function GameplayPage() {
         {/* LEFT SIDEBAR */}
         <aside className={`${styles.sidebar} ${styles.left}`}>
           <PlayerAvatar
-            name="Taylor Swift"
-            balance="4.2B"
-            flag="🇮🇹"
-            image="/avatars/taylor-swift.jpg"
-            color="6E78B3"
+            name='Taylor Swift'
+            balance='4.2B'
+            flag='🇮🇹'
+            image='/avatars/taylor-swift.jpg'
+            color='blue'
           />
 
           <ToggleSwitch enabled={autoRoll} setEnabled={setAutoRoll} />
 
           <footer className={styles.footerActions}>
-            <Button label="Sound on" icon={<Volume2 size={18} />} />
-            <Button label="Exit game" icon={<LogOut size={18} />} />
+            <Button label='Sound on' icon={<Volume2 size={18} />} />
+            <Button label='Exit game' icon={<LogOut size={18} />} />
           </footer>
         </aside>
 
@@ -105,17 +105,17 @@ export default function GameplayPage() {
         {/* RIGHT SIDEBAR */}
         <aside className={`${styles.sidebar} ${styles.right}`}>
           <PlayerAvatar
-            name="Taylor Swift"
-            balance="4.2B"
-            flag="🇮🇹"
-            image="/avatars/taylor-swift.jpg"
-            color="6E78B3"
+            name='Taylor Swift'
+            balance='4.2B'
+            flag='🇮🇹'
+            image='/avatars/taylor-swift.jpg'
+            color='red'
           />
 
           <div className={styles.actionColumn}>
-            <Button label="Undo" icon={<Undo2 size={18} />} />
+            <Button label='Undo' icon={<Undo2 size={18} />} />
             <Button
-              label="Done"
+              label='Done'
               icon={<CheckCircle2 size={18} />}
               onClick={() => rollDice()}
             />

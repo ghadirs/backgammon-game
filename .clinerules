@@ -1,0 +1,22 @@
+# TOKEN-EFFICIENCY RULES
+
+## 1. Response Verbosity
+
+- **Be Concise:** Do not explain code unless I ask "Why?".
+- **No Chat:** Avoid "I have updated the file..." or "Let me know if you need...". Just show the code or action.
+- **Diff-Only:** When updating large files, only show the changed lines unless the full file is required for context.
+
+## 2. Context Management
+
+- **Targeted Reading:** Never use `list_files` on the root directory unless necessary. Use specific paths.
+- **Memory Bank:** Maintain a small `memory_bank/activeContext.md`. Update it at the end of every task, then tell me: "Context updated. Please start a new session." (Starting a new session resets the token count).
+
+## 3. Code Standards
+
+- **No Comments:** Do not add redundant comments to code (e.g., // this is a variable).
+- **Modular Thinking:** If a file exceeds 300 lines, suggest breaking it into smaller components. Small files = fewer tokens per edit.
+
+## 4. MCP & Tools
+
+- **Tool Discipline:** Only use tools if strictly necessary.
+- **Terminal:** If you need to check a file's existence, use `ls [file]` instead of reading the whole directory.

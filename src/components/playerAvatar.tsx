@@ -1,12 +1,12 @@
 import React from "react";
-import styles from "./playerAvatar.module.scss";
+import Image from "next/image";
 
 interface PlayerAvatarProps {
   name: string;
   balance: string;
-  flag: string; // e.g., "🇮🇹"
+  flag: string;
   image: string;
-  color: string;
+  color?: "blue" | "red" | "purple";
   align?: "left" | "right";
 }
 
@@ -15,24 +15,54 @@ const PlayerAvatarComponent = ({
   balance,
   flag,
   image,
-  color,
+  color = "blue",
   align = "left",
 }: PlayerAvatarProps) => {
+  const colorMap = {
+    blue: "accent-blue",
+    red: "accent-red",
+    purple: "purple-500",
+  };
+
+  const alignClass = align === "left" ? "items-start" : "items-end";
+
+  const hexagonBgColor = {
+    blue: "bg-accent-blue",
+    red: "bg-accent-red",
+    purple: "bg-purple-500",
+  };
+
   return (
-    <div className={`${styles.container} ${styles[align]}`}>
-      <div className={`${styles.hexagonStroke} ${styles[color]}`}>
-        <div className={styles.hexagonInner}>
-          <img src={image} alt={name} className={styles.avatarImg} />
-        </div>
+    <div className={`flex flex-col ${alignClass} gap-3`}>
+      {/* Hexagon Avatar */}
+      <div className={`relative w-20 h-24 rounded-lg overflow-hidden border-2 border-${colorMap[color]} flex items-center justify-center`}>
+        <div className={`absolute inset-0 ${hexagonBgColor[color]} opacity-20`} />
+        <Image
+          src={image}
+          alt={`${name}'s avatar`}
+          width={78}
+          height={88}
+          className="w-full h-full object-cover"
+          priority={false}
+        />
       </div>
-      <div className={styles.meta}>
-        <div className={styles.nameRow}>
-          <span className={styles.flag}>{flag}</span>
-          <span className={styles.name}>{name}</span>
+
+      {/* Player Info */}
+      <div className={`flex flex-col ${align === "left" ? "items-start" : "items-end"}`}>
+        {/* Name Row */}
+        <div className="flex items-center gap-2">
+          <span className="text-xl" role="img" aria-label={`Country flag: ${flag}`}>
+            {flag}
+          </span>
+          <span className="text-white font-bold text-sm">{name}</span>
         </div>
-        <div className={styles.balanceRow}>
-          <span className={styles.diamondIcon}>💎</span>
-          <span className={styles.balance}>{balance}</span>
+
+        {/* Balance Row */}
+        <div className="flex items-center gap-1 mt-1">
+          <span className="text-lg" role="img" aria-label="Gem currency">
+            💎
+          </span>
+          <span className="text-accent-cyan font-bold text-xs">{balance}</span>
         </div>
       </div>
     </div>

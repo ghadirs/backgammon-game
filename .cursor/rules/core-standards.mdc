@@ -1,0 +1,23 @@
+---
+description: Global coding standards and behavioral rules
+alwaysApply: true
+---
+
+# Core Engineering Standards
+
+## 🧠 Reasoning Protocol
+
+- **Search First:** Always use `grep` or codebase search to find existing patterns before creating new ones.
+- **Re-use First:** Do not duplicate logic. If a utility or component exists, extend it.
+- **No Assumptions:** If a requirement is vague or a file is missing, ASK. Do not hallucinate.
+
+## 🛠 Coding Quality
+
+- **Clean Code:** Use early returns, descriptive naming (e.g., `isLoading`, `handleAuth`), and functional programming.
+- **File Length:** Keep files under 250 lines. Split logic into custom hooks or helper files if they grow.
+- **Strict Types:** No `any` types. Interfaces are preferred for data; Types for unions/aliasing.
+
+## 🚫 Prohibited Actions
+
+- **No Testing:** Do not generate unit tests, spec files, or integration tests. I consider frontend tests unnecessary for this project's scope.
+- **No Test Dependencies:** Do not suggest installing Jest, Vitest, or Cypress.

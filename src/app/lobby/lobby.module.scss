@@ -1,0 +1,8 @@
+/* Smooth hover transition for cards */
+.game-card {
+  transition: transform 0.2s ease-in-out;
+}
+
+.game-card:hover {
+  transform: translateY(-2px);
+}

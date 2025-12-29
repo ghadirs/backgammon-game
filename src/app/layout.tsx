@@ -1,5 +1,7 @@
 import type {Metadata} from "next";
-import "./globals.scss"; // Ensure this file exists for global styles
+import "./globals.css";
+import TopNavbar from "@/components/topNavbar.tsx";
+import BottomNavbar from "@/components/bottomNavbar.tsx"; // Ensure this file exists for global styles
 
 export const metadata: Metadata = {
     title: "Backgammon Game",
@@ -14,8 +16,14 @@ export default function RootLayout({
     return (
         <html lang="en">
         {/* h-screen ensures the body takes up the full browser height */}
-        <body className="min-h-screen bg-[#1a1a1a] text-white antialiased">
-        {children}
+        <body
+            className="h-screen w-screen flex items-center justify-center bg-[url('public/background.png')] bg-cover bg-center overflow-hidden">
+        <div
+            className="glass-panel relative w-screen h-screen rounded-[21px] flex flex-col justify-between overflow-hidden shadow-2xl">
+            <TopNavbar/>
+            {children}
+            <BottomNavbar/>
+        </div>
         </body>
         </html>
     );

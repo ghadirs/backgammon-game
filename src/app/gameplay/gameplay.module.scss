@@ -31,12 +31,14 @@ $btn-action: #2a2d3e;
 }
 
 .gameGrid {
+  position: relative;
   display: grid;
   grid-template-columns: 240px 1fr 240px;
   gap: 20px; // Layout constants derived from Figma redlines
   $sidebar-width: 105px; // The frame width in Figma
   $top-padding: 16px; // Top margin for avatar group
   $side-padding: 18px; // Horizontal padding
+  z-index: 1;
 
   .mainWrapper {
     height: 100vh;

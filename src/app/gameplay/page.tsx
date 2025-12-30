@@ -81,7 +81,7 @@ export default function GameplayPage() {
                 </aside>
 
                 {/* CENTER BOARD */}
-                <section className={styles.boardContainer}>
+                <section className={"flex items-center mt-auto mb-auto " + styles.boardContainer}>
                     <div className={styles.boardOuterFrame}>
                         <BackgammonBoard
                             isRolling={isRolling}

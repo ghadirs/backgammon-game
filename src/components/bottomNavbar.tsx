@@ -1,7 +1,7 @@
 "use react";
 import React from "react";
 import Link from "next/link";
-import { Gamepad, Home, User2, Users, Wallet } from "lucide-react";
+import { Gamepad, Home, Users, Wallet } from "lucide-react";
 
 const BottomNavbar: React.FC<{}> = () => {
   return (

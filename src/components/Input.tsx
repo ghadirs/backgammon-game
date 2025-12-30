@@ -5,7 +5,7 @@ import { Gem } from "lucide-react";
 
 interface InputProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: () => void;
   placeholder?: string;
   isLoading?: boolean;
@@ -25,7 +25,7 @@ export default function Input({
       <input
         type="text" // Change to "number" if you want strict number input
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={onChange}
         placeholder={placeholder}
         className="h-full flex-grow bg-transparent px-5 text-sm font-medium text-white placeholder-white/50 outline-none transition-colors"
       />

@@ -19,8 +19,11 @@ function LobbyPage() {
 
   return (
     <main className="flex-1 w-full px-6 flex gap-4 items-center justify-center mt-2">
-      {gameCards.map((game) => (
-        <div className="game-card relative group w-1/3 h-1/2   rounded-xl overflow-hidden cursor-pointer shadow-lg border border-transparent hover:border-[#1A3150]">
+      {gameCards.map((game, idx) => (
+        <div
+          key={idx}
+          className="game-card relative group w-1/3 h-1/2   rounded-xl overflow-hidden cursor-pointer shadow-lg border border-transparent hover:border-[#1A3150]"
+        >
           <img
             src={`images/lobby/${GameTypeEnum[game].toLowerCase()}.png`}
             className="w-full h-full object-cover"

@@ -31,10 +31,13 @@ export default function GameModal() {
     }));
   };
 
-  const onTelegramIdChangeHandle = (e) => {
+  const onTelegramIdChangeHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value;
+    if (e.target.value === "") return;
+    value = e.target.value;
     setPrivateGame((prevState) => ({
       ...prevState,
-      telegramId: e.target.value,
+      telegramId: value,
     }));
   };
 
@@ -91,12 +94,14 @@ export default function GameModal() {
               ))}
             </div>
             <Button
-              label={"CONTINUE"}
+              label={"LAUNCH"}
               icon={
-                <Crown
-                  size={10}
-                  className="text-white fill-white translate-y-[0.5px]"
-                />
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA]">
+                  <Gem
+                    size={10}
+                    className="text-white fill-white translate-y-[0.5px]"
+                  />
+                </div>
               }
             />
           </div>
@@ -135,12 +140,14 @@ export default function GameModal() {
 
             {/* Continue Button */}
             <Button
-              label={"LAUNCH"}
+              label={"CONTINUE"}
               icon={
-                <Gem
-                  size={10}
-                  className="text-white fill-white translate-y-[0.5px]"
-                />
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-yellow-400 to-yellow-600">
+                  <Gem
+                    size={10}
+                    className="text-white fill-white translate-y-[0.5px]"
+                  />
+                </div>
               }
             />
           </div>
@@ -156,7 +163,7 @@ export default function GameModal() {
             />
             <Input
               value={privateGame.telegramId}
-              onChange={onBetAmountChangeHandle}
+              onChange={onTelegramIdChangeHandle}
               onSubmit={() => null}
               placeholder={"Enter Telegram ID..."}
               isLoading={false}

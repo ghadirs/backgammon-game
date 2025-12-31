@@ -117,7 +117,7 @@ export default function GameModal() {
                   key={index}
                   onClick={() => setSelectedSlot(index)}
                   className={`
-                  group relative flex h-16 w-20 items-center justify-center rounded-xl border transition-all duration-200
+                  group relative flex h-16 w-20 items-center justify-center rounded-xl border transition-all duration-200 cursor-pointer
                   ${
                     selectedSlot === index
                       ? "border-yellow-500 bg-[#1A3150] shadow-[0_0_15px_rgba(234,179,8,0.2)]" // Active State

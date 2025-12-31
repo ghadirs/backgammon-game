@@ -8,7 +8,7 @@ $btn-action: #2a2d3e;
   height: 100vh;
   width: 100vw;
   // REPLACED: Using the blurred background image from your design
-  background: url('/background.png') no-repeat center center;
+  background: url("/background.png") no-repeat center center;
   background-size: cover;
   display: flex;
   justify-content: center;
@@ -19,7 +19,7 @@ $btn-action: #2a2d3e;
 
   // Optional: Add a dark overlay if the image is too bright compared to Figma
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -166,7 +166,7 @@ $btn-action: #2a2d3e;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px #6E78B3;
+      border: 2px #6e78b3;
 
       &.player1 {
         background: #ff4d4d;
@@ -212,7 +212,7 @@ $btn-action: #2a2d3e;
     align-items: center;
 
     .title {
-      font-family: 'Serif', serif;
+      font-family: "Serif", serif;
       font-size: 3.5rem;
       font-weight: 900;
       color: $gold-primary;
@@ -237,7 +237,8 @@ $btn-action: #2a2d3e;
     width: 100%;
 
     /* Action buttons (Undo, Done, Sound, Exit) */
-    .actionBtn, .footerBtn {
+    .actionBtn,
+    .footerBtn {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -300,7 +301,8 @@ $btn-action: #2a2d3e;
   }
 
   // Footer Buttons (Exit/Sound)
-  .footerActions, .actionColumn {
+  .footerActions,
+  .actionColumn {
     display: flex;
     flex-direction: column;
     gap: 10px;

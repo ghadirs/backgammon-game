@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Crown, Gem } from "lucide-react";
 import { TabOption } from "@/types/wallet.ts";
 

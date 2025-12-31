@@ -14,14 +14,14 @@ export default function PlayerRequestRow({
                                              flagEmoji = "🇮🇹",
                                              gemScore = "36361.2",
                                              coinScore = "2.7B",
-                                             avatarUrl = "avatars/taylor-swift.jpg",
+                                             avatarUrl = "/avatars/taylor-swift.jpg",
                                          }: Partial<PlayerProps>) {
     const friends = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
     return (
         // Card Container
         <main className="w-full px-6 flex items-start justify-center mt-6">
             <div
-                className="flex flex-col w-3/4 gap-2 h-[60vh] overflow-y-scroll items-center justify-between rounded-xl bg-[#09152A]/35 border-b border-[#1A3150] px-4 py-2 backdrop-blur-sm">
+                className="flex flex-col w-3/4 gap-2 h-[75vh] overflow-y-scroll items-center justify-between rounded-xl bg-[#09152A]/35 border-b border-[#1A3150] px-4 py-2 backdrop-blur-sm">
                 {friends.map((e, idx) => (
                     <div
                         key={idx}

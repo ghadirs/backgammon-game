@@ -20,7 +20,7 @@ export default function WalletPage() {
     return (
         <main className="w-full px-6 flex items-start justify-end mt-6 gap-3">
             <div
-                className="flex flex-col w-3/4 gap-2 h-[65vh] items-center justify-between rounded-xl bg-[#09152A]/35 border-b border-[#1A3150] px-4 py-2 backdrop-blur-xs">
+                className="flex flex-col w-3/4 gap-2 h-[75vh] items-center justify-between rounded-xl bg-[#09152A]/35 border-b border-[#1A3150] px-4 py-2 backdrop-blur-xs">
                 <CurrencySwitch activeTab={activeTab} setActiveTab={setActiveTab}/>
                 {activeTab == "points" && (
                     <div className={`flex w-full items-center justify-evenly gap-2`}>

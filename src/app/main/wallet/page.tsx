@@ -5,9 +5,12 @@ import { TabOption } from "@/types/wallet.ts";
 import ItemCard from "@/components/itemCard.tsx";
 import { Button } from "@/components";
 import styles from "./wallet.module.scss";
+import { useModalStore } from "@/store/useModalStore.tsx";
 
 export default function WalletPage() {
   const [activeTab, setActiveTab] = useState<TabOption>("points");
+
+  const openModal = useModalStore((state) => state.openModal);
 
   const cards = [1, 2, 3, 4];
 
@@ -17,7 +20,10 @@ export default function WalletPage() {
         <CurrencySwitch activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className={`flex w-full items-center justify-evenly gap-2`}>
           {cards.map((card, idx) => (
-            <ItemCard key={idx} />
+            <ItemCard
+              key={idx}
+              onClickHandle={() => openModal("confirm-purchase")}
+            />
           ))}
         </div>
       </div>

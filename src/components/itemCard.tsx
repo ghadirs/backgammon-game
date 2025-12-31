@@ -7,15 +7,19 @@ interface ItemCardProps {
   amount?: string;
   price?: string;
   imageUrl?: string;
+  onClickHandle: () => void;
 }
 
 export default function ItemCard({
   amount = "1,000",
   price = "1.19 Ton",
-  imageUrl = "/path-to-your-coin-image.png", // Replace with your actual asset path
+  onClickHandle,
 }: ItemCardProps) {
   return (
-    <div className="group relative flex h-50 w-full flex-col items-center justify-between overflow-hidden rounded-md border border-[#1A3150] bg-[#09152A]/35 backdrop-blur-xs transition-all hover:bg-[#09152A]/50 hover:shadow-lg hover:border-[#2A4A75] cursor-pointer">
+    <div
+      className="group relative flex h-50 w-full flex-col items-center justify-between overflow-hidden rounded-md border border-[#1A3150] bg-[#09152A]/35 backdrop-blur-xs transition-all hover:bg-[#09152A]/50 hover:shadow-lg hover:border-[#2A4A75] cursor-pointer"
+      onClick={onClickHandle}
+    >
       {/* 1. Top Hanging Tab (Amount) */}
       <div className="absolute top-0 z-10 flex h-6 w-[80px] items-center justify-center rounded-b-2xl border-b border-x border-[#1A3150] bg-[#09152A]/60 backdrop-blur-xs">
         <span className="text-[11px] font-semibold text-white tracking-wide">

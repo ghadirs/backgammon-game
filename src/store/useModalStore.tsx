@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { GameTypeEnum } from "@/types/lobby.ts";
 
 // Define the types of modals available in your app
-type ModalType = "game" | null;
+type ModalType = "game" | "confirm-purchase" | null;
 
 interface ModalStore {
   type: ModalType;

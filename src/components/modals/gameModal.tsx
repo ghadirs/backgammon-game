@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Crown, Gem } from "lucide-react";
+import { Users, Crown, Gem } from "lucide-react";
 import { useModalStore } from "@/store/useModalStore.tsx";
 import { GameTypeEnum } from "@/types/lobby.ts";
 import Input from "@/components/Input.tsx";
@@ -141,6 +141,15 @@ export default function GameModal() {
             onSubmit={() => null}
             placeholder={"Enter amount of TON..."}
             isLoading={false}
+            buttonLabel="Continue"
+            icon={
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA] shadow-sm">
+                <Gem
+                  size={10}
+                  className="text-white fill-white translate-y-[0.5px]"
+                />
+              </div>
+            }
           />
           <Input
             value={privateGame.telegramId}
@@ -148,6 +157,15 @@ export default function GameModal() {
             onSubmit={() => null}
             placeholder={"Enter Telegram ID..."}
             isLoading={false}
+            buttonLabel="Invite Friends"
+            icon={
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA] shadow-sm">
+                <Users
+                  size={10}
+                  className="text-white fill-white translate-y-[0.5px]"
+                />
+              </div>
+            }
           />
         </div>
       )}

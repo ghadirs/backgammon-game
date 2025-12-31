@@ -12,8 +12,8 @@ export default function ConfirmPurchaseModal() {
   return (
     <Modal title={"CONFIRM PURCHASE"} onClose={closeModal}>
       <ItemCard onClickHandle={() => openModal("confirm-purchase")} />
-      <div className="flex gap-4 justify-center items-center mt-4">
-        <Button label="CANCEL" />
+      <div className="flex gap-4 justify-center items-center mt-4 mb-5">
+        <Button label="CANCEL" onClick={() => closeModal()} />
         <Button label="PAY" />
       </div>
     </Modal>

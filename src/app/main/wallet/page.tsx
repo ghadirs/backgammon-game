@@ -6,9 +6,13 @@ import ItemCard from "@/components/itemCard.tsx";
 import { Button } from "@/components";
 import styles from "./wallet.module.scss";
 import { useModalStore } from "@/store/useModalStore.tsx";
+import Input from "@/components/Input.tsx";
+import { Gem } from "lucide-react";
 
 export default function WalletPage() {
   const [activeTab, setActiveTab] = useState<TabOption>("points");
+  const [depositValue, setDepositValue] = useState<string>("");
+  const [withdrawValue, setWithdrawValue] = useState<string>("");
 
   const openModal = useModalStore((state) => state.openModal);
 
@@ -18,14 +22,50 @@ export default function WalletPage() {
     <main className="w-full px-6 flex items-start justify-end mt-6 gap-3">
       <div className="flex flex-col w-3/4 gap-2 h-[65vh] items-center justify-between rounded-xl bg-[#09152A]/35 border-b border-[#1A3150] px-4 py-2 backdrop-blur-xs">
         <CurrencySwitch activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className={`flex w-full items-center justify-evenly gap-2`}>
-          {cards.map((card, idx) => (
-            <ItemCard
-              key={idx}
-              onClickHandle={() => openModal("confirm-purchase")}
-            />
-          ))}
-        </div>
+        {activeTab == "points" && (
+          <div className={`flex w-full items-center justify-evenly gap-2`}>
+            {cards.map((card, idx) => (
+              <ItemCard
+                key={idx}
+                onClickHandle={() => openModal("confirm-purchase")}
+              />
+            ))}
+          </div>
+        )}
+        {activeTab == "deposit" && (
+          <Input
+            className="mt-auto mb-auto"
+            value={depositValue}
+            onChange={(e) => setDepositValue(e.target.value)}
+            onSubmit={() => console.log(1)}
+            buttonLabel={"DEPOSIT TON"}
+            icon={
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA] shadow-sm">
+                <Gem
+                  size={10}
+                  className="text-white fill-white translate-y-[0.5px]"
+                />
+              </div>
+            }
+          />
+        )}
+        {activeTab == "withdraw" && (
+          <Input
+            className="mt-auto mb-auto"
+            value={withdrawValue}
+            onChange={(e) => setWithdrawValue(e.target.value)}
+            onSubmit={() => console.log(1)}
+            buttonLabel={"WITHDRAW TON"}
+            icon={
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA] shadow-sm">
+                <Gem
+                  size={10}
+                  className="text-white fill-white translate-y-[0.5px]"
+                />
+              </div>
+            }
+          />
+        )}
       </div>
       <Button
         className={

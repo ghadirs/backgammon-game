@@ -1,1 +1,1 @@
-export type TabOption = 'points' | 'toncoin' | 'withdraw';
+export type TabOption = "points" | "deposit" | "withdraw";

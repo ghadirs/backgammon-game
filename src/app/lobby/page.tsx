@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import "./lobby.module.scss";
 import {ChevronRight} from "lucide-react";
 import {useModalStore} from "@/store/useModalStore.tsx";
 import {GameTypeEnum} from "@/types/lobby.ts";

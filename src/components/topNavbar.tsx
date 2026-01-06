@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import { CoinsIcon, CrownIcon, GemIcon } from "lucide-react";
+import Image from "next/image";
+import avatarImg from "@/assets/avatars/taylor-swift.jpg";
 
 const TopNavbar = () => {
   return (
@@ -23,8 +25,8 @@ const TopNavbar = () => {
 
       <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#12233f] px-8 py-2 rounded-b-[24px] border-b border-x border-[#1A3150] shadow-lg flex items-center gap-3 h-[50px]">
         <div className="relative">
-          <img
-            src="https://i.pravatar.cc/150?u=swift"
+          <Image
+            src={avatarImg}
             alt="Profile"
             className="w-8 h-8 rounded-full border border-pink-400 object-cover"
           />

@@ -1,23 +1,24 @@
 @import "tailwindcss";
 @import "tailwindcss/utilities";
 
-
-html, body {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* Ensure the Next.js root div also fills the height */
-#__next, [data-nextjs-scroll-focus-boundary] {
-    height: 100%;
+#__next,
+[data-nextjs-scroll-focus-boundary] {
+  height: 100%;
 }
 
 /* Exact Figma Specs */
 .glass-panel {
-    background: rgba(9, 21, 42, 0.6);
-    border: 1px solid #1A3150;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  background: rgba(9, 21, 42, 0.6);
+  border: 1px solid #1a3150;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }

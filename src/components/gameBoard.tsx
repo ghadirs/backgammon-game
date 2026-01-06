@@ -155,17 +155,15 @@ const BackgammonBoard: React.FC<Props> = ({
     }, [diceValues, isRolling]);
 
     return (
-        <div className="flex justify-center items-center p-2 sm:p-4 bg-[#1a1a1a] w-full h-full max-h-[90vh]">
+        <div className="flex justify-center bg-[#1a1a1a] w-full h-full max-h-[90vh] rounded-xl overflow-x-hidden">
             <div
-                style={{borderRadius: "12px", overflow: "hidden"}}
-                className="shadow-2xl border border-[#3e2315] w-full max-w-[1100px] aspect-[11/7] relative"
-            >
+                className="shadow-2xl border border-[#3e2315] w-full max-w-[1100px] aspect-[11/7] relative rounded-xl overflow-x-hidden">
                 <canvas
-                    ref={canvasRef} // Mouse Events
+                    ref={canvasRef}
                     onClick={handleCanvasClick}
                     width={WIDTH}
                     height={HEIGHT}
-                    className={`w-full h-full block touch-none ${styles.gameBoard}`}
+                    className="w-full h-full block touch-none shadow-[2px_2px_4px_rgba(0,0,0,0.3)] border border-[#3e2315] rounded-[5px]"
                 />
             </div>
         </div>

@@ -1,20 +1,34 @@
-import React from 'react';
-import styles from './button.module.scss';
+import React from "react";
 
 interface ButtonProps {
     icon?: React.ReactNode;
     label: string;
     onClick?: () => void;
     className?: string;
+    children?: React.ReactNode;
 }
 
-const Button = ({icon, label, onClick, className}: ButtonProps) => {
+export default function Button({
+                                   icon,
+                                   label,
+                                   onClick,
+                                   className,
+                                   children
+                               }: ButtonProps) {
     return (
-        <button className={`${styles.figmaBtn} ${className}`} onClick={onClick}>
-            {icon && <span className={styles.icon}>{icon}</span>}
-            <span className={styles.label}>{label}</span>
+        <button
+            onClick={onClick}
+            className={
+                className
+                    ? className
+                    : `group flex h-12 min-w-[160px] items-center justify-center gap-3 rounded-xl border border-[#1A3150] bg-[#09152A]/60 px-8 transition-all hover:bg-[#1A3150] hover:shadow-lg active:scale-95 cursor-pointer`
+            }
+        >
+            {!children ? <>{icon}
+                <span className="text-sm font-medium uppercase tracking-wide text-white">
+      {label}
+    </span> </> : children
+            }
         </button>
     );
-};
-
-export default Button;
+}

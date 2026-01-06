@@ -1,23 +1,21 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
-import { BoardState, Move, Player } from '../types';
+import { BoardState, Move, Player } from "@/types";
 
 export class AiService {
   // Use gemini-3-pro-preview for complex reasoning tasks like backgammon strategy
-  private modelId = 'gemini-3-pro-preview';
+  private modelId = "gemini-3-pro-preview";
 
   async getBestMove(
     board: BoardState,
     dice: number[],
-    player: Player
+    player: Player,
   ): Promise<{ rationale: string; moves: Move[] }> {
-    
     // Create a new GoogleGenAI instance right before the call to ensure the most up-to-date API key is used
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     // Construct a representation of the board for the AI
     const boardDescription = `
-      You are playing as ${player === Player.White ? 'White' : 'Black'}.
+      You are playing as ${player === Player.White ? "White" : "Black"}.
       Board Configuration (Index 0-23):
       ${JSON.stringify(board.points)}
       Positive numbers are White pieces, negative are Black.
@@ -44,41 +42,44 @@ export class AiService {
         model: this.modelId,
         contents: boardDescription,
         config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    rationale: { 
-                      type: Type.STRING,
-                      description: "Strategic explanation for the chosen moves"
-                    },
-                    moves: {
-                        type: Type.ARRAY,
-                        items: {
-                            type: Type.OBJECT,
-                            properties: {
-                                from: { type: Type.INTEGER },
-                                to: { type: Type.INTEGER }
-                            },
-                            propertyOrdering: ["from", "to"]
-                        }
-                    }
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              rationale: {
+                type: Type.STRING,
+                description: "Strategic explanation for the chosen moves",
+              },
+              moves: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    from: { type: Type.INTEGER },
+                    to: { type: Type.INTEGER },
+                  },
+                  propertyOrdering: ["from", "to"],
                 },
-                propertyOrdering: ["rationale", "moves"]
-            }
-        }
+              },
+            },
+            propertyOrdering: ["rationale", "moves"],
+          },
+        },
       });
 
       // Extract text directly from the response property and trim to ensure valid JSON parsing
       const jsonStr = response.text?.trim();
       if (!jsonStr) throw new Error("No response from AI");
-      
+
       const result = JSON.parse(jsonStr);
       return result;
     } catch (error) {
       console.error("AI Error:", error);
       // Fallback or empty move if AI fails
-      return { rationale: "AI failed to think or encountered an error.", moves: [] };
+      return {
+        rationale: "AI failed to think or encountered an error.",
+        moves: [],
+      };
     }
   }
 }

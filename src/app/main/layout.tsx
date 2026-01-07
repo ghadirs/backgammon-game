@@ -11,7 +11,7 @@ export default function MainLayout({children}: { children: React.ReactNode }) {
         <>
             <div className="flex items-center justify-end border-b border-[#1A3150] py-1.5 px-2 ">
                 <h2 className="text-2xl font-normal uppercase ml-auto mr-auto tracking-wide text-white">
-                    {path == "/main/wallet" ? "WALLET" : "FRIENDS"}
+                    {path == "/main/wallet" ? "WALLET" : path == "/main/leaders" ? "LEADERS" : "FRIENDS"}
                 </h2>
 
                 {/* Close Button */}

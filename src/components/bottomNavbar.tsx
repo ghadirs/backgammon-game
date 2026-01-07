@@ -44,7 +44,7 @@ const BottomNavbar: React.FC<{}> = () => {
           },
           {
             key: "profile",
-            href: "/main",
+            href: "/profile",
             label: "PROFILE",
             icon: <User size={18} strokeWidth={2} className='text-white' />,
           },

@@ -89,6 +89,11 @@ const PlayerAvatar = ({
             src={image}
             alt={name}
             className="w-full h-full object-cover"
+            width={56}
+            height={56}
+            style={{
+              clipPath: HEX_CLIP,
+            }}
           />
         </div>
       </div>

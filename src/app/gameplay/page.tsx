@@ -127,7 +127,7 @@ export default function GameplayPage() {
             name="Taylor Swift"
             balance="4.2B"
             flag="🇮🇹"
-            image="/avatars/taylor-swift.jpg"
+            image={avatarImg}
             color="6E78B3"
           />
 

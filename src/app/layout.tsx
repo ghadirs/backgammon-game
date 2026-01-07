@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import BottomNavbar from "@/components/bottomNavbar.tsx";
-import { DialogProvider } from "@/components/ui/dialog";
+import { DialogProvider } from "@/components/DialogProvider";
 
 export const metadata: Metadata = {
   title: "Backgammon Game",

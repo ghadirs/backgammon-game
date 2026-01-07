@@ -7,6 +7,7 @@ import { GameTypeEnum } from "@/types/lobby.ts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components";
 import Modal from "@/components/modals/modal.tsx";
+import VersusModal from "./versusModal";
 
 interface PrivateGame {
   amount: string;
@@ -23,6 +24,7 @@ export default function GameModal() {
   const betOptions = [0.5, 1, 3];
 
   const closeModal = useModalStore((state) => state.closeModal);
+  const openModal = useModalStore((state) => state.openModal);
   const gameType = useModalStore((state) => state.gameType);
 
   const onBetAmountChangeHandle = (e) => {
@@ -123,18 +125,7 @@ export default function GameModal() {
             ))}
           </div>
 
-          {/* Continue Button */}
-          <Button
-            label={"CONTINUE"}
-            icon={
-              <div className='flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-yellow-400 to-yellow-600'>
-                <Gem
-                  size={10}
-                  className='text-white fill-white translate-y-[0.5px]'
-                />
-              </div>
-            }
-          />
+         <VersusModal />
         </div>
       )}
       {gameType == GameTypeEnum.PRIVATE && (

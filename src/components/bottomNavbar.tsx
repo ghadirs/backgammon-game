@@ -27,7 +27,7 @@ const BottomNavbar: React.FC<{}> = () => {
                     <Link
                         href="/lobby"
                         className={[
-                            "flex h-full w-full flex-col items-center bg-gradient-to-t from-[#00CCFF]/50 to-[#00CCFF]/50 pt-[6px] text-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] transition-colors rounded-tl-[25px] box-border border-bottom-transparent",
+                            "flex h-full w-full flex-col items-center bg-gradient-to-t from-[#00CCFF]/50 to-[#00CCFF]/50 pt-[6px] text-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] transition-colors rounded-tl-[25px] box-border border-b-0",
                             isActive("/lobby") ? "border-2 border-[#00CCFF]" : "border-2 border-transparent",
                         ].join(" ")}
                     >

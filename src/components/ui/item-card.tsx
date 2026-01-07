@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Gem } from "lucide-react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import chessImg from "@/assets/images/wallet/diamond-chest.png";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 interface ItemCardProps {
   amount?: string;
   price?: string;
-  imageUrl?: string | typeof Image;
+  imageUrl?: string | StaticImageData;
   onClick?: () => void;
   className?: string;
 }

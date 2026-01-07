@@ -1,10 +1,12 @@
-import TopNavbar from "@/components/topNavbar.tsx";
+"use client";
+
+import ProfileTopNavbar from "@/components/ProfileTopNavbar";
 import BottomNavbar from "@/components/bottomNavbar.tsx";
 
 export default function ProfileLayout({children}: { children: React.ReactNode }) {
     return (
         <>
-            <TopNavbar/>
+            <ProfileTopNavbar/>
             {children}
             <BottomNavbar/>
         </>

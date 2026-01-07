@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import TopNavbar from "@/components/topNavbar.tsx";
 import BottomNavbar from "@/components/bottomNavbar.tsx";
 import { DialogProvider } from "@/components/ui/dialog";
 

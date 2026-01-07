@@ -39,6 +39,7 @@ function LobbyPage() {
     <main className='flex-1 w-full px-6 flex gap-4 items-center justify-center mt-2'>
       {gameCards.map((game, idx) => (
         <div
+        key={idx}
           className='flex flex-col items-center w-1/3 max-w-[400px] min-w-[120px] max-h-[400px]'
           onClick={() => onClickPlayHandle(idx)}
         >

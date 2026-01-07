@@ -15,7 +15,7 @@ import ItemCard from "@/components/itemCard";
 // Constants
 const DIALOG_STYLES = {
   container:
-    "max-w-[560px] bg-[#09152A]/85 border-[#1A3150] backdrop-blur-xl rounded-2xl p-0",
+    "max-w-[560px] bg-[#09152A]/10 border border-[#0098EA] backdrop-blur-2xl rounded-2xl p-0",
   header: "border-b border-[#1A3150] px-6 py-5 relative",
   title: "text-2xl font-normal uppercase tracking-wide text-white text-center",
   content: "px-6 pb-6",

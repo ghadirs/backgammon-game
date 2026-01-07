@@ -30,25 +30,24 @@ function LobbyPage() {
   ];
 
   const onClickPlayHandle = (idx: number) => {
+    setSelectedCard(idx);
     setGameType(idx);
     openModal("game");
   };
 
   return (
-    <main className="flex-1 w-full px-6 flex gap-4 items-center justify-center mt-2">
+    <main className='flex-1 w-full px-6 flex gap-4 items-center justify-center mt-2'>
       {gameCards.map((game, idx) => (
         <div
-          className="flex flex-col items-center"
-          onClick={() =>
-            selectedCard == idx ? setSelectedCard(null) : setSelectedCard(idx)
-          }
+          className='flex flex-col items-center w-1/3 max-w-[400px] min-w-[120px] max-h-[400px]'
+          onClick={() => onClickPlayHandle(idx)}
         >
           {/* Container Logic:
         Figma defines the top (image) and bottom (button) as separate rectangles.
         We stack them using Flexbox.
         Width is set to w-[159px] per Figma, but you can use w-full in a grid.
       */}
-          <div className="relative flex flex-col w-[159px] group cursor-pointer transition-transform duration-200 hover:-translate-y-1">
+          <div className='relative flex flex-col w-full h-auto max-w-[400px] max-h-[400px] group cursor-pointer transition-transform duration-200 hover:-translate-y-1'>
             {/* --- Top Section: Image Area --- */}
             <div
               className={`
@@ -66,11 +65,11 @@ function LobbyPage() {
               <Image
                 src={game.imgSrc}
                 alt={game.title}
-                className="w-full h-full object-cover"
+                className='w-full h-full object-cover'
               />
 
               {/* Optional: Glossy overlay reflection matching the "glass" feel of the design */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
+              <div className='absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none' />
             </div>
 
             {/* --- Bottom Section: "Play Now!" Button --- */}
@@ -87,17 +86,17 @@ function LobbyPage() {
           `}
             >
               {/* Text Content */}
-              <div className="flex items-center gap-1 z-10">
+              <div className='flex items-center gap-1 z-10'>
                 <span
-                  className="text-white text-[14px] leading-[15px] font-sans tracking-wide drop-shadow-sm"
+                  className='text-white text-[14px] leading-[15px] font-sans tracking-wide drop-shadow-sm'
                   style={{ fontFamily: "'Strait', sans-serif" }} // Inline font-family from Figma
                 >
-                  {selectedCard == idx ? "Play Now!" : game.title}
+                  Play Now! - {game.title}
                 </span>
 
                 {/* Show chevron only on default state (based on previous html logic), or keep clean for "Play Now" */}
                 {selectedCard !== idx && (
-                  <ChevronRight size={12} className="text-gray-400" />
+                  <ChevronRight size={12} className='text-gray-400' />
                 )}
               </div>
             </div>

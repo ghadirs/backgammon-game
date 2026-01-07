@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Users, Crown, Gem } from "lucide-react";
 import { useModalStore } from "@/store/useModalStore.tsx";
 import { GameTypeEnum } from "@/types/lobby.ts";
-import Input from "@/components/Input.tsx";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components";
 import Modal from "@/components/modals/modal.tsx";
 
@@ -46,8 +46,8 @@ export default function GameModal() {
     <Modal title={GameTypeEnum[gameType]} onClose={closeModal}>
       {/* Betting Options Row */}
       {gameType == GameTypeEnum.ONLINE && (
-        <div className="flex flex-col items-center py-12">
-          <div className="flex gap-4 mb-10">
+        <div className='flex flex-col items-center py-12'>
+          <div className='flex gap-4 mb-10'>
             {betOptions.map((amount) => (
               <button
                 key={amount}
@@ -62,25 +62,25 @@ export default function GameModal() {
                 `}
               >
                 {/* TON Icon Representation */}
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#0098EA] shadow-sm">
+                <div className='flex h-6 w-6 items-center justify-center rounded-full bg-[#0098EA] shadow-sm'>
                   <Gem
                     size={12}
-                    className="text-white fill-white translate-y-[1px]"
+                    className='text-white fill-white translate-y-[1px]'
                   />
                 </div>
 
                 {/* Amount Text */}
-                <span className="text-lg font-medium text-white">{amount}</span>
+                <span className='text-lg font-medium text-white'>{amount}</span>
               </button>
             ))}
           </div>
           <Button
             label={"LAUNCH"}
             icon={
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA]">
+              <div className='flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA]'>
                 <Gem
                   size={10}
-                  className="text-white fill-white translate-y-[0.5px]"
+                  className='text-white fill-white translate-y-[0.5px]'
                 />
               </div>
             }
@@ -90,9 +90,9 @@ export default function GameModal() {
 
       {/* Single Game */}
       {gameType == GameTypeEnum.SINGLE && (
-        <div className="flex flex-col items-center py-12">
+        <div className='flex flex-col items-center py-12'>
           {/* Selection Row (4 Cards) */}
-          <div className="flex gap-4 mb-10">
+          <div className='flex gap-4 mb-10'>
             {[1, 2, 3, 4].map((index) => (
               <button
                 key={index}
@@ -110,10 +110,14 @@ export default function GameModal() {
                 <div
                   className={`
                    flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-b from-yellow-400 to-yellow-600 shadow-sm
-                   ${selectedSlot === index ? "scale-110" : "opacity-80 grayscale-[0.3] group-hover:grayscale-0"}
+                   ${
+                     selectedSlot === index
+                       ? "scale-110"
+                       : "opacity-80 grayscale-[0.3] group-hover:grayscale-0"
+                   }
                 `}
                 >
-                  <Crown size={14} className="text-white fill-white" />
+                  <Crown size={14} className='text-white fill-white' />
                 </div>
               </button>
             ))}
@@ -123,10 +127,10 @@ export default function GameModal() {
           <Button
             label={"CONTINUE"}
             icon={
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-yellow-400 to-yellow-600">
+              <div className='flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-yellow-400 to-yellow-600'>
                 <Gem
                   size={10}
-                  className="text-white fill-white translate-y-[0.5px]"
+                  className='text-white fill-white translate-y-[0.5px]'
                 />
               </div>
             }
@@ -134,19 +138,19 @@ export default function GameModal() {
         </div>
       )}
       {gameType == GameTypeEnum.PRIVATE && (
-        <div className="flex flex-col items-center py-12 gap-5">
+        <div className='flex flex-col items-center py-12 gap-5'>
           <Input
             value={privateGame.amount}
             onChange={onBetAmountChangeHandle}
             onSubmit={() => null}
             placeholder={"Enter amount of TON..."}
             isLoading={false}
-            buttonLabel="Continue"
+            buttonLabel='Continue'
             icon={
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA] shadow-sm">
+              <div className='flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA] shadow-sm'>
                 <Gem
                   size={10}
-                  className="text-white fill-white translate-y-[0.5px]"
+                  className='text-white fill-white translate-y-[0.5px]'
                 />
               </div>
             }
@@ -157,12 +161,12 @@ export default function GameModal() {
             onSubmit={() => null}
             placeholder={"Enter Telegram ID..."}
             isLoading={false}
-            buttonLabel="Invite Friends"
+            buttonLabel='Invite Friends'
             icon={
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA] shadow-sm">
+              <div className='flex h-5 w-5 items-center justify-center rounded-full bg-[#0098EA] shadow-sm'>
                 <Users
                   size={10}
-                  className="text-white fill-white translate-y-[0.5px]"
+                  className='text-white fill-white translate-y-[0.5px]'
                 />
               </div>
             }

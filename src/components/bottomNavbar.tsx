@@ -1,61 +1,89 @@
-"use react";
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import {Gamepad, Home, Users, Wallet} from "lucide-react";
+import {usePathname} from "next/navigation";
+import {Home, User, Users, Wallet} from "lucide-react";
 
 const BottomNavbar: React.FC<{}> = () => {
+    const pathname = usePathname();
+
+    const isActive = (href: string) => {
+        if (href === "/") return pathname === "/";
+        if (href === "/main") return pathname === "/main";
+        return pathname === href || pathname.startsWith(`${href}/`);
+    };
+
     return (
-        <nav className="w-full flex justify-center pb-0 z-10">
-            <div
-                className="flex items-center gap-10 px-8 py-3 bg-[#0d1b30]/90 backdrop-blur-md rounded-t-2xl border-t border-x border-[#1A3150] shadow-lg">
-                <Link
-                    href="/lobby"
-                    className="flex flex-col items-center gap-1 cursor-pointer group"
-                >
-                    <Home
-                        className="fas fa-home text-white font-light text-lg group-hover:text-gray-400 transition-colors"></Home>
-                    <span
-                        className="text-[9px] uppercase tracking-wider text-white font-light group-hover:text-gray-400">
-            Lobbey
-          </span>
-                </Link>
+        <nav
+            aria-label="Primary"
+            className="fixed bottom-0 left-1/2 z-20 w-full -translate-x-1/2 pb-0"
+        >
+            <ul
+                className="mx-auto grid h-[51px] w-[340px] max-w-[95vw] grid-cols-4 overflow-hidden rounded-tl-[25px] rounded-tr-[25px] bg-black shadow-[0px_4px_4px_rgba(0,0,0,0.25)]"
+            >
+                {/* Active (Lobby) */}
+                <li className="h-full w-full">
+                    <Link
+                        href="/lobby"
+                        className={[
+                            "flex h-full w-full flex-col items-center bg-gradient-to-t from-[#00CCFF]/50 to-[#00CCFF]/50 pt-[6px] text-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)] transition-colors rounded-tl-[25px] box-border border-bottom-transparent",
+                            isActive("/lobby") ? "border-2 border-[#00CCFF]" : "border-2 border-transparent",
+                        ].join(" ")}
+                    >
+                        <Home size={18} strokeWidth={2} className="text-white" />
+                        <span className="mt-auto pb-[6px] text-center text-[14px] font-normal leading-[17px]">
+                            LOBBEY
+                        </span>
+                    </Link>
+                </li>
 
-                <Link
-                    href="/gameplay"
-                    className="flex flex-col items-center gap-1 cursor-pointer group"
-                >
-                    <Gamepad
-                        className="fas fa-gamepad text-white font-light text-lg group-hover:text-gray-400 transition-colors"></Gamepad>
-                    <span
-                        className="text-[9px] uppercase tracking-wider text-white font-light font-medium group-hover:text-gray-400">
-            Mini Game
-          </span>
-                </Link>
+                <li className="h-full w-full">
+                    <Link
+                        href="/main/friends"
+                        className={[
+                            "flex h-full w-full flex-col items-center pt-[6px] text-white transition-colors hover:text-gray-300 box-border",
+                            isActive("/main/friends") ? "border-2 border-[#00CCFF]" : "border-2 border-transparent",
+                        ].join(" ")}
+                    >
+                        <Users size={18} strokeWidth={2} className="text-current" />
+                        <span className="mt-auto pb-[6px] text-center text-[14px] font-normal leading-[17px]">
+                            FRIENDS
+                        </span>
+                    </Link>
+                </li>
 
-                <Link
-                    href="/main/friends"
-                    className="flex flex-col items-center gap-1 cursor-pointer group"
-                >
-                    <Users
-                        className="fas fa-user-friends text-white font-light text-lg group-hover:text-gray-400 transition-colors"/>
-                    <span
-                        className="text-[9px] uppercase tracking-wider text-white font-light font-medium group-hover:text-gray-400">
-            Friends
-          </span>
-                </Link>
+                <li className="h-full w-full">
+                    <Link
+                        href="/main/wallet"
+                        className={[
+                            "flex h-full w-full flex-col items-center pt-[6px] text-white transition-colors hover:text-gray-300 box-border",
+                            isActive("/main/wallet") ? "border-2 border-[#00CCFF]" : "border-2 border-transparent",
+                        ].join(" ")}
+                    >
+                        <Wallet size={18} strokeWidth={2} className="text-current" />
+                        <span className="mt-auto pb-[6px] text-center text-[14px] font-normal leading-[17px]">
+                            WALLET
+                        </span>
+                    </Link>
+                </li>
 
-                <Link
-                    href="/main/wallet"
-                    className="flex flex-col items-center gap-1 cursor-pointer group"
-                >
-                    <Wallet
-                        className="fas fa-wallet text-white font-light text-lg group-hover:text-gray-400 transition-colors"></Wallet>
-                    <span
-                        className="text-[9px] uppercase tracking-wider text-white font-light font-medium group-hover:text-gray-400">
-            Wallet
-          </span>
-                </Link>
-            </div>
+                {/* Dark right segment */}
+                <li className="h-full w-full">
+                    <Link
+                        href="/main"
+                        className={[
+                            "flex h-full w-full flex-col items-center bg-[#283852] pt-[6px] text-white transition-colors hover:text-gray-200 rounded-tr-[25px] box-border",
+                            isActive("/main") ? "border-2 border-[#00CCFF]" : "border-2 border-transparent",
+                        ].join(" ")}
+                    >
+                        <User size={18} strokeWidth={2} className="text-current" />
+                        <span className="mt-auto pb-[6px] text-center text-[14px] font-normal leading-[17px]">
+                            PROFILE
+                        </span>
+                    </Link>
+                </li>
+            </ul>
         </nav>
     );
 };

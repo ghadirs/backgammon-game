@@ -10,7 +10,7 @@ import onlineGameImg from "@/assets/images/lobby/online.png";
 import privateGameImg from "@/assets/images/lobby/private.png";
 
 function LobbyPage() {
-  const [isSelected, setIsSelected] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const openModal = useModalStore((state) => state.openModal);
   const setGameType = useModalStore((state) => state.setGameType);
 
@@ -37,7 +37,12 @@ function LobbyPage() {
   return (
     <main className="flex-1 w-full px-6 flex gap-4 items-center justify-center mt-2">
       {gameCards.map((game, idx) => (
-        <div className="flex flex-col items-center">
+        <div
+          className="flex flex-col items-center"
+          onClick={() =>
+            selectedCard == idx ? setSelectedCard(null) : setSelectedCard(idx)
+          }
+        >
           {/* Container Logic:
         Figma defines the top (image) and bottom (button) as separate rectangles.
         We stack them using Flexbox.
@@ -50,7 +55,7 @@ function LobbyPage() {
             relative h-[128px] w-full overflow-hidden rounded-t-[20px] 
             transition-all duration-300
             ${
-              isSelected
+              selectedCard == idx
                 ? "border-[3px] border-b-0 border-[#00CCFF] shadow-[0_0_15px_rgba(0,204,255,0.3)]"
                 : "border border-b-0 border-white/30"
             }
@@ -75,7 +80,7 @@ function LobbyPage() {
             rounded-b-[12px] backdrop-blur-[40px]
             transition-all duration-300
             ${
-              isSelected
+              selectedCard == idx
                 ? "border-[3px] border-t-0 border-[#00CCFF] bg-[radial-gradient(50%_50%_at_50%_50%,rgba(25,94,117,0.7)_25%,rgba(0,204,255,0.7)_100%)]"
                 : "bg-[#1A3150]/70" // Default dark blue transparency
             }
@@ -87,11 +92,11 @@ function LobbyPage() {
                   className="text-white text-[14px] leading-[15px] font-sans tracking-wide drop-shadow-sm"
                   style={{ fontFamily: "'Strait', sans-serif" }} // Inline font-family from Figma
                 >
-                  {isSelected ? "Play Now!" : game.title}
+                  {selectedCard == idx ? "Play Now!" : game.title}
                 </span>
 
                 {/* Show chevron only on default state (based on previous html logic), or keep clean for "Play Now" */}
-                {!isSelected && (
+                {selectedCard !== idx && (
                   <ChevronRight size={12} className="text-gray-400" />
                 )}
               </div>

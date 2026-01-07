@@ -4,20 +4,20 @@ import Image from "next/image";
 import avatarImg from "@/assets/avatars/taylor-swift.jpg";
 
 interface PlayerProps {
-  name: string;
+  title: string;
   flagEmoji: string; // e.g., "🇮🇹"
   gemScore: string; // e.g., "36361.2"
   coinScore: string; // e.g., "2.7B"
   avatarUrl: string;
 }
 
-export default function PlayerRequestRow({
-  name = "Taylor Swift",
+export default function FriendsPage({
+  title = "Taylor Swift",
   flagEmoji = "🇮🇹",
   gemScore = "36361.2",
   coinScore = "2.7B",
   avatarUrl = avatarImg,
-}: Partial<PlayerProps>) {
+}: PlayerProps) {
   const friends = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
   return (
     // Card Container
@@ -43,7 +43,7 @@ export default function PlayerRequestRow({
                 {/* Image (Slightly smaller to reveal border) */}
                 <Image
                   src={avatarUrl}
-                  alt={name}
+                  alt={title}
                   className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] object-cover bg-slate-800"
                   style={{
                     clipPath:
@@ -58,7 +58,7 @@ export default function PlayerRequestRow({
                 <div className="flex items-center gap-2">
                   <span className="text-lg leading-none">{flagEmoji}</span>
                   <span className="text-base font-medium text-white">
-                    {name}
+                    {title}
                   </span>
                 </div>
 

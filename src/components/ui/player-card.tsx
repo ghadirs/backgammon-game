@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { Gem, Coins, Trash2, CheckCircle, UserPlus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,7 @@ interface PlayerCardProps {
   flagEmoji: string;
   gemScore: string;
   coinScore: string;
-  avatarUrl: string | typeof Image;
+  avatarUrl: string | StaticImageData;
   rank?: number;
   onDelete?: () => void;
   onAction?: () => void;
@@ -69,7 +69,7 @@ export function PlayerCard({
           />
           {/* Image */}
           <Image
-            src={avatarUrl as string}
+            src={avatarUrl}
             alt={name}
             className={cn(
               "absolute object-cover bg-slate-800",

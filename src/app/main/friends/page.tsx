@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Gem, Coins, Trash2, Check, CheckCircle, UserPlus } from "lucide-react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import avatarImg from "@/assets/avatars/taylor-swift.jpg";
 import FriendsSwitch from "@/components/friendsSwitch.tsx";
 import { FriendsTabOption } from "@/types/friends.ts";
@@ -11,7 +11,7 @@ interface PlayerProps {
   flagEmoji: string; // e.g., "🇮🇹"
   gemScore: string; // e.g., "36361.2"
   coinScore: string; // e.g., "2.7B"
-  avatarUrl: string;
+  avatarUrl: string | StaticImageData;
 }
 
 export default function FriendsPage({
